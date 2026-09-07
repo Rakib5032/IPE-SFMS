@@ -1,0 +1,1067 @@
+/* =========================================================
+   COMING SOON PAGE
+   ========================================================= */
+
+.coming-soon-page {
+  min-height: calc(100vh - 68px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 24px;
+
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.coming-soon-card {
+  width: 100%;
+  max-width: 620px;
+
+  padding: 34px 46px 44px;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  box-shadow:
+    0 10px 35px rgba(15, 23, 42, 0.07);
+
+  animation: cardEnter 0.5s ease-out both;
+}
+
+
+/* =========================================================
+   CARTOON SCENE
+   ========================================================= */
+
+.cartoon-scene {
+  position: relative;
+
+  width: 100%;
+  max-width: 500px;
+  height: 220px;
+
+  margin: 0 auto 18px;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #f8fbff 0%,
+      #ffffff 75%
+    );
+
+  border-radius: 14px;
+}
+
+
+/* =========================================================
+   GROUND
+   ========================================================= */
+
+.scene-ground {
+  position: absolute;
+
+  left: 30px;
+  right: 30px;
+  bottom: 25px;
+
+  height: 5px;
+
+  border-radius: 5px;
+
+  background: #cbd5e1;
+}
+
+
+/* =========================================================
+   CLOUDS
+   ========================================================= */
+
+.scene-cloud {
+  position: absolute;
+
+  width: 48px;
+  height: 14px;
+
+  border-radius: 20px;
+
+  background: #e2e8f0;
+
+  opacity: 0.7;
+}
+
+.scene-cloud::before,
+.scene-cloud::after {
+  content: "";
+
+  position: absolute;
+
+  border-radius: 50%;
+
+  background: #e2e8f0;
+}
+
+.scene-cloud::before {
+  width: 22px;
+  height: 22px;
+
+  left: 8px;
+  bottom: 4px;
+}
+
+.scene-cloud::after {
+  width: 17px;
+  height: 17px;
+
+  right: 7px;
+  bottom: 4px;
+}
+
+.cloud-1 {
+  top: 35px;
+  left: 35px;
+
+  animation: cloudMove 5s ease-in-out infinite;
+}
+
+.cloud-2 {
+  top: 58px;
+  right: 35px;
+
+  animation: cloudMove 6s ease-in-out infinite reverse;
+}
+
+
+/* =========================================================
+   CONSTRUCTION SIGN
+   ========================================================= */
+
+.construction-sign {
+  position: absolute;
+
+  right: 48px;
+  bottom: 29px;
+
+  width: 175px;
+  height: 125px;
+
+  animation: signShake 1.5s ease-in-out infinite;
+}
+
+.sign-board {
+  position: absolute;
+
+  z-index: 3;
+
+  top: 0;
+  left: 0;
+
+  width: 175px;
+  height: 88px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 2px;
+
+  background: #f8d27a;
+
+  border: 3px solid #334155;
+  border-radius: 8px;
+
+  box-shadow:
+    5px 5px 0 #cbd5e1;
+
+  font-size: 20px;
+  line-height: 1.05;
+  font-weight: 800;
+
+  letter-spacing: 0.04em;
+
+  color: #1e3a5f;
+}
+
+.sign-board::before,
+.sign-board::after {
+  content: "";
+
+  position: absolute;
+
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #64748b;
+
+  border: 2px solid #334155;
+}
+
+.sign-board::before {
+  left: 10px;
+  top: 10px;
+}
+
+.sign-board::after {
+  right: 10px;
+  top: 10px;
+}
+
+
+/* =========================================================
+   SIGN POSTS
+   ========================================================= */
+
+.sign-post {
+  position: absolute;
+
+  z-index: 1;
+
+  bottom: 0;
+
+  width: 9px;
+  height: 55px;
+
+  border-radius: 3px;
+
+  background: #8b5e34;
+
+  border: 2px solid #334155;
+}
+
+.post-left {
+  left: 35px;
+}
+
+.post-right {
+  right: 35px;
+}
+
+
+/* =========================================================
+   WORKER
+   ========================================================= */
+
+.worker {
+  position: absolute;
+
+  z-index: 5;
+
+  left: 78px;
+  bottom: 28px;
+
+  width: 82px;
+  height: 155px;
+
+  animation: workerBounce 1.8s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   WORKER HEAD
+   ========================================================= */
+
+.worker-head {
+  position: absolute;
+
+  left: 22px;
+  top: 8px;
+
+  width: 44px;
+  height: 45px;
+
+  border-radius: 45%;
+
+  background: #f3c49f;
+
+  border: 3px solid #334155;
+}
+
+
+/* =========================================================
+   HAIR
+   ========================================================= */
+
+.worker-hair {
+  position: absolute;
+
+  top: 1px;
+  left: 3px;
+
+  width: 13px;
+  height: 13px;
+
+  border-radius: 50%;
+
+  background: #334155;
+}
+
+
+/* =========================================================
+   HELMET
+   ========================================================= */
+
+.worker-helmet {
+  position: absolute;
+
+  z-index: 4;
+
+  left: -3px;
+  top: -13px;
+
+  width: 50px;
+  height: 24px;
+
+  border-radius: 28px 28px 8px 8px;
+
+  background: #fbbf24;
+
+  border: 3px solid #334155;
+}
+
+.worker-helmet::after {
+  content: "";
+
+  position: absolute;
+
+  left: -7px;
+  bottom: -4px;
+
+  width: 58px;
+  height: 7px;
+
+  border-radius: 7px;
+
+  background: #fbbf24;
+
+  border: 3px solid #334155;
+}
+
+.worker-helmet span {
+  position: absolute;
+
+  left: 18px;
+  top: 5px;
+
+  width: 11px;
+  height: 4px;
+
+  border-radius: 3px;
+
+  background: #ffffff;
+
+  opacity: 0.75;
+}
+
+
+/* =========================================================
+   FACE
+   ========================================================= */
+
+.worker-eye {
+  position: absolute;
+
+  top: 18px;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #1e293b;
+
+  animation: blink 4s infinite;
+}
+
+.eye-left {
+  left: 10px;
+}
+
+.eye-right {
+  right: 10px;
+}
+
+.worker-mouth {
+  position: absolute;
+
+  left: 15px;
+  bottom: 7px;
+
+  width: 13px;
+  height: 7px;
+
+  border-bottom: 3px solid #334155;
+
+  border-radius: 0 0 12px 12px;
+}
+
+
+/* =========================================================
+   BODY
+   ========================================================= */
+
+.worker-body {
+  position: absolute;
+
+  left: 18px;
+  top: 52px;
+
+  width: 48px;
+  height: 57px;
+
+  border-radius: 9px;
+
+  background: #2563eb;
+
+  border: 3px solid #334155;
+}
+
+.worker-shirt-line {
+  position: absolute;
+
+  left: 19px;
+  top: 0;
+
+  width: 5px;
+  height: 54px;
+
+  background: #bfdbfe;
+}
+
+
+/* =========================================================
+   ARMS
+   ========================================================= */
+
+.worker-arm {
+  position: absolute;
+
+  z-index: -1;
+
+  width: 14px;
+  height: 48px;
+
+  border-radius: 12px;
+
+  background: #f3c49f;
+
+  border: 3px solid #334155;
+}
+
+.arm-left {
+  left: 8px;
+  top: 56px;
+
+  transform: rotate(38deg);
+}
+
+.arm-right {
+  right: 3px;
+  top: 51px;
+
+  transform-origin: top center;
+
+  transform: rotate(-48deg);
+
+  animation: hammerArm 1.5s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   LEGS
+   ========================================================= */
+
+.worker-leg {
+  position: absolute;
+
+  top: 105px;
+
+  width: 16px;
+  height: 34px;
+
+  border-radius: 7px;
+
+  background: #1e3a8a;
+
+  border: 3px solid #334155;
+}
+
+.leg-left {
+  left: 23px;
+
+  transform: rotate(8deg);
+}
+
+.leg-right {
+  right: 22px;
+
+  transform: rotate(-8deg);
+}
+
+
+/* =========================================================
+   SHOES
+   ========================================================= */
+
+.worker-shoe {
+  position: absolute;
+
+  z-index: 2;
+
+  top: 135px;
+
+  width: 27px;
+  height: 12px;
+
+  border-radius: 12px 12px 5px 5px;
+
+  background: #334155;
+
+  border: 3px solid #1e293b;
+}
+
+.shoe-left {
+  left: 12px;
+}
+
+.shoe-right {
+  right: 10px;
+}
+
+
+/* =========================================================
+   HAMMER
+   ========================================================= */
+
+.hammer {
+  position: absolute;
+
+  z-index: 7;
+
+  left: 136px;
+  top: 75px;
+
+  width: 48px;
+  height: 55px;
+
+  transform: rotate(-40deg);
+
+  transform-origin: bottom center;
+
+  animation: hammerSwing 1.5s ease-in-out infinite;
+}
+
+.hammer-head {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 38px;
+  height: 17px;
+
+  border-radius: 6px;
+
+  background: #64748b;
+
+  border: 3px solid #334155;
+}
+
+.hammer-head::after {
+  content: "";
+
+  position: absolute;
+
+  right: -5px;
+  top: 2px;
+
+  width: 9px;
+  height: 11px;
+
+  border-radius: 4px;
+
+  background: #94a3b8;
+
+  border: 2px solid #334155;
+}
+
+.hammer-handle {
+  position: absolute;
+
+  left: 15px;
+  top: 12px;
+
+  width: 8px;
+  height: 48px;
+
+  border-radius: 5px;
+
+  background: #a16207;
+
+  border: 2px solid #78350f;
+}
+
+
+/* =========================================================
+   IMPACT LINES
+   ========================================================= */
+
+.impact {
+  position: absolute;
+
+  z-index: 8;
+
+  width: 15px;
+  height: 3px;
+
+  border-radius: 5px;
+
+  background: #f59e0b;
+
+  opacity: 0;
+
+  animation: impactFlash 1.5s ease-in-out infinite;
+}
+
+.impact-1 {
+  right: 208px;
+  top: 93px;
+
+  transform: rotate(-25deg);
+}
+
+.impact-2 {
+  right: 199px;
+  top: 110px;
+
+  transform: rotate(15deg);
+
+  animation-delay: 0.05s;
+}
+
+.impact-3 {
+  right: 213px;
+  top: 124px;
+
+  transform: rotate(35deg);
+
+  animation-delay: 0.1s;
+}
+
+
+/* =========================================================
+   FLOATING GEARS
+   ========================================================= */
+
+.floating-gear {
+  position: absolute;
+
+  color: #94a3b8;
+
+  font-size: 20px;
+
+  opacity: 0.65;
+
+  animation: gearFloat 3s ease-in-out infinite;
+}
+
+.gear-1 {
+  left: 35px;
+  bottom: 65px;
+}
+
+.gear-2 {
+  right: 25px;
+  top: 25px;
+
+  font-size: 16px;
+
+  animation-delay: 0.8s;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.coming-soon-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 7px 13px;
+
+  margin-bottom: 18px;
+
+  border-radius: 999px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  letter-spacing: 0.04em;
+
+  text-transform: uppercase;
+
+  animation: fadeUp 0.4s ease-out 0.15s both;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #94a3b8;
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.coming-soon-title {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 32px;
+  line-height: 1.2;
+
+  font-weight: 700;
+
+  letter-spacing: -0.02em;
+
+  animation: fadeUp 0.4s ease-out 0.2s both;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.coming-soon-description {
+  max-width: 430px;
+
+  margin: 15px auto 30px;
+
+  color: #64748b;
+
+  font-size: 15px;
+
+  line-height: 1.7;
+
+  animation: fadeUp 0.4s ease-out 0.25s both;
+}
+
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+.coming-soon-button {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  min-width: 175px;
+  height: 44px;
+
+  padding: 0 20px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #1e293b;
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  animation: fadeUp 0.4s ease-out 0.3s both;
+}
+
+.coming-soon-button:hover {
+  background: #0f172a;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 6px 16px rgba(15, 23, 42, 0.18);
+}
+
+.coming-soon-button:active {
+  transform: translateY(0);
+
+  box-shadow: none;
+}
+
+.button-arrow {
+  font-size: 17px;
+
+  transition: transform 0.2s ease;
+}
+
+.coming-soon-button:hover .button-arrow {
+  transform: translateX(-3px);
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+@keyframes workerBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes hammerArm {
+  0%,
+  45% {
+    transform: rotate(-48deg);
+  }
+
+  60%,
+  75% {
+    transform: rotate(-78deg);
+  }
+
+  90%,
+  100% {
+    transform: rotate(-48deg);
+  }
+}
+
+@keyframes hammerSwing {
+  0%,
+  45% {
+    transform: rotate(-40deg);
+  }
+
+  60%,
+  75% {
+    transform: rotate(-65deg);
+  }
+
+  90%,
+  100% {
+    transform: rotate(-40deg);
+  }
+}
+
+@keyframes signShake {
+  0%,
+  45%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  60% {
+    transform: rotate(-1.5deg);
+  }
+
+  70% {
+    transform: rotate(1.5deg);
+  }
+
+  80% {
+    transform: rotate(-0.5deg);
+  }
+}
+
+@keyframes impactFlash {
+  0%,
+  48% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  55%,
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@keyframes gearFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-7px) rotate(25deg);
+  }
+}
+
+@keyframes cloudMove {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes blink {
+  0%,
+  45%,
+  48%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  46%,
+  47% {
+    transform: scaleY(0.1);
+  }
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+.coming-soon-button:focus-visible {
+  outline: 3px solid rgba(30, 41, 59, 0.2);
+
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coming-soon-card,
+  .coming-soon-status,
+  .coming-soon-title,
+  .coming-soon-description,
+  .coming-soon-button,
+  .worker,
+  .worker-arm,
+  .hammer,
+  .construction-sign,
+  .impact,
+  .floating-gear,
+  .scene-cloud,
+  .worker-eye {
+    animation: none;
+  }
+
+  .coming-soon-button,
+  .button-arrow {
+    transition: none;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .coming-soon-page {
+    min-height: calc(100vh - 62px);
+
+    padding: 24px 16px;
+  }
+
+  .coming-soon-card {
+    padding: 28px 20px 36px;
+
+    border-radius: 15px;
+  }
+
+  .cartoon-scene {
+    height: 195px;
+
+    transform: scale(0.92);
+  }
+
+  .coming-soon-title {
+    font-size: 27px;
+  }
+
+  .coming-soon-description {
+    margin-top: 14px;
+    margin-bottom: 27px;
+
+    font-size: 14px;
+  }
+
+  .coming-soon-button {
+    width: 100%;
+    max-width: 220px;
+  }
+}

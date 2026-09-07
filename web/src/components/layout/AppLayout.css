@@ -1,0 +1,298 @@
+.app-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  background: #f8fafc;
+}
+
+
+.app-main {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.app-header {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 90;
+
+  min-height: 72px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 12px 24px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  box-shadow:
+    0 2px 10px rgba(
+      15,
+      23,
+      42,
+      0.04
+    );
+}
+
+
+.app-header-left {
+  min-width: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 16px;
+}
+
+
+/* ============================================================
+   DRAWER BUTTON
+   ============================================================ */
+
+.app-menu-button {
+  width: 42px;
+
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 0;
+
+  border: 1px solid #e4e7ec;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.app-menu-button:hover {
+  background: #f8fafc;
+
+  border-color: #cbd5e1;
+}
+
+
+.app-menu-button:active {
+  transform: scale(0.96);
+}
+
+
+.app-menu-button span {
+  width: 18px;
+
+  height: 2px;
+
+  border-radius: 999px;
+
+  background: #344054;
+}
+
+
+/* ============================================================
+   PAGE TITLE
+   ============================================================ */
+
+.app-header-title {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.app-header-title h1 {
+  margin: 0;
+
+  font-size: 20px;
+
+  line-height: 1.2;
+
+  font-weight: 750;
+
+  color: #101828;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+.app-header-title span {
+  margin-top: 3px;
+
+  font-size: 11px;
+
+  color: #98a2b3;
+}
+
+
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+
+.header-back-button {
+  flex-shrink: 0;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  min-height: 40px;
+
+  padding: 0 14px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #344054;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.header-back-button:hover {
+  background: #f8fafc;
+
+  border-color: #98a2b3;
+}
+
+
+.header-back-button:active {
+  transform: translateY(1px);
+}
+
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.app-content {
+  width: 100%;
+
+  min-height:
+    calc(100vh - 72px);
+
+  padding: 24px;
+}
+
+
+@media (min-width: 1100px) {
+
+  .app-content {
+    padding: 28px 32px;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 640px) {
+
+  .app-header {
+    min-height: 64px;
+
+    padding: 10px 14px;
+  }
+
+
+  .app-header-left {
+    gap: 10px;
+  }
+
+
+  .app-menu-button {
+    width: 40px;
+
+    height: 40px;
+  }
+
+
+  .app-header-title h1 {
+    font-size: 18px;
+  }
+
+
+  .app-header-title span {
+    display: none;
+  }
+
+
+  .header-back-button {
+    width: 40px;
+
+    height: 40px;
+
+    min-height: 40px;
+
+    padding: 0;
+
+    justify-content: center;
+  }
+
+
+  .header-back-button span:last-child {
+    display: none;
+  }
+
+
+  .app-content {
+    min-height:
+      calc(100vh - 64px);
+
+    padding: 16px;
+  }
+
+}

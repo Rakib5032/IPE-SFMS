@@ -1,0 +1,70 @@
+# =========================
+# Web API
+# =========================
+fastapi
+uvicorn[standard]
+
+# =========================
+# Database
+# =========================
+sqlalchemy
+psycopg2-binary
+alembic
+
+# =========================
+# Configuration
+# =========================
+pydantic-settings
+python-dotenv
+
+# =========================
+# Authentication & Security
+# =========================
+pyjwt
+pwdlib[argon2]
+python-multipart
+
+# =========================
+# HTTP / API Testing
+# =========================
+httpx
+
+# =========================
+# Testing
+# =========================
+pytest
+pytest-asyncio
+
+# =========================
+# Web Application
+# =========================
+jinja2
+
+# =========================
+# Reporting / Excel
+# =========================
+pandas
+openpyxl
+
+# =========================
+# Image/File Processing
+# =========================
+pillow
+
+# =========================
+# Background Tasks / Caching
+# =========================
+redis
+celery
+
+# =========================
+# Real-time Communication
+# =========================
+websockets
+
+# =========================
+# Validation / Email
+# =========================
+email-validator
+
+passlib[bcrypt]

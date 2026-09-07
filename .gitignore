@@ -1,0 +1,248 @@
+# =========================================================
+# SFMS - Git Ignore
+# =========================================================
+
+
+# =========================================================
+# Python
+# =========================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.so
+
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+
+*.egg-info/
+.installed.cfg
+*.egg
+
+
+# =========================================================
+# Virtual Environment
+# =========================================================
+
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+
+# =========================================================
+# Environment / Secrets
+# =========================================================
+
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.crt
+
+
+# =========================================================
+# FastAPI / Uvicorn
+# =========================================================
+
+*.log
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+.ruff_cache/
+
+
+# =========================================================
+# Alembic
+# =========================================================
+
+# Do NOT ignore the migrations folder.
+# Alembic migration files should be committed.
+
+# alembic.ini should normally be committed.
+
+
+# =========================================================
+# Node / React / Vite
+# =========================================================
+
+node_modules/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.npm/
+.yarn/
+.pnpm-store/
+
+
+# =========================================================
+# Vite
+# =========================================================
+
+dist/
+.vite/
+
+
+# =========================================================
+# Frontend Environment
+# =========================================================
+
+# Vite environment files
+web/.env
+web/.env.*
+!web/.env.example
+
+
+# =========================================================
+# IDE / Editors
+# =========================================================
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+.idea/
+*.iml
+
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+
+
+# =========================================================
+# OS Generated Files
+# =========================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+
+# =========================================================
+# Temporary Files
+# =========================================================
+
+*.tmp
+*.temp
+*.swp
+*.swo
+
+*.bak
+*.backup
+
+
+# =========================================================
+# Test / Coverage
+# =========================================================
+
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+
+# =========================================================
+# Database / Local Data
+# =========================================================
+
+*.sqlite
+*.sqlite3
+*.db
+
+# PostgreSQL dumps
+*.sql.gz
+*.dump
+
+
+# =========================================================
+# Logs
+# =========================================================
+
+logs/
+*.log
+
+
+# =========================================================
+# Generated Files
+# =========================================================
+
+*.generated.*
+generated/
+
+# Python generated reports
+reports/
+
+
+# =========================================================
+# Uploads / User Generated Files
+# =========================================================
+
+# Ignore local uploaded files if they are not part of the source code
+uploads/
+media/
+
+# Keep empty directories with .gitkeep if needed.
+
+
+# =========================================================
+# Build / Cache
+# =========================================================
+
+.cache/
+.parcel-cache/
+.eslintcache
+
+*.tsbuildinfo
+
+
+# =========================================================
+# Local Project Files
+# =========================================================
+
+# Local notes
+notes/
+*.local
+
+# Temporary exports
+exports/
+tmp/
+temp/
