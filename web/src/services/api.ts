@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import {
   getAccessToken,
   getRefreshToken,
@@ -13,6 +14,9 @@ const api = axios.create({
   },
 });
 
+/*
+ * Add access token to normal authenticated requests.
+ */
 api.interceptors.request.use((config) => {
   const accessToken = getAccessToken();
 
@@ -23,12 +27,37 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+/*
+ * Response interceptor
+ */
 api.interceptors.response.use(
   (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
 
+    /*
+     * IMPORTANT:
+     *
+     * Login itself is expected to return 401 when the
+     * Employee ID or password is wrong.
+     *
+     * DO NOT redirect/reload the page in that case.
+     *
+     * Let Login.tsx handle the error and show the popup.
+     */
+    const requestUrl = originalRequest?.url || "";
+
+    if (
+      requestUrl.includes("/auth/login") ||
+      requestUrl.endsWith("/auth/login")
+    ) {
+      return Promise.reject(error);
+    }
+
+    /*
+     * Only handle 401 errors for authenticated requests.
+     */
     if (
       error.response?.status !== 401 ||
       originalRequest?._retry
@@ -36,14 +65,29 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    /*
+     * Get refresh token.
+     */
     const refreshToken = getRefreshToken();
 
+    /*
+     * No refresh token means the user is not authenticated.
+     *
+     * Do NOT redirect if this is already the login page/request.
+     */
     if (!refreshToken) {
       clearTokens();
-      window.location.href = "/";
+
+      if (window.location.pathname !== "/") {
+        window.location.href = "/";
+      }
+
       return Promise.reject(error);
     }
 
+    /*
+     * Prevent infinite retry loop.
+     */
     originalRequest._retry = true;
 
     try {
@@ -59,20 +103,32 @@ api.interceptors.response.use(
         refresh_token,
       } = response.data;
 
+      /*
+       * Save new tokens.
+       */
       setTokens(
         access_token,
         refresh_token
       );
 
+      /*
+       * Retry original request with new token.
+       */
       originalRequest.headers.Authorization =
         `Bearer ${access_token}`;
 
       return api(originalRequest);
-    } catch {
+    } catch (refreshError) {
+      /*
+       * Refresh failed.
+       */
       clearTokens();
-      window.location.href = "/";
 
-      return Promise.reject(error);
+      if (window.location.pathname !== "/") {
+        window.location.href = "/";
+      }
+
+      return Promise.reject(refreshError);
     }
   }
 );
