@@ -16,8 +16,14 @@ class UserUpdate(BaseModel):
     designation: str | None = None
     email: EmailStr | None = None
     password: str | None = None
-    role_id: int | None = Field(default=None, gt=0)
-    organization_unit_id: int | None = Field(default=None, gt=0)
+    role_id: int | None = Field(
+        default=None,
+        gt=0,
+    )
+    organization_unit_id: int | None = Field(
+        default=None,
+        gt=0,
+    )
     is_active: bool | None = None
 
 

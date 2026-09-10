@@ -38,14 +38,15 @@ def create_line_assignment(
     role = current_user.role.code
 
     # Permission
-
     allowed_roles = {
         "ADMIN",
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if role not in allowed_roles:
@@ -55,7 +56,6 @@ def create_line_assignment(
         )
 
     # Get employee
-
     employee = db.scalar(
         select(User).where(
             User.employee_id == data.employee_id
@@ -82,7 +82,6 @@ def create_line_assignment(
         )
 
     # Get line
-    
     line = db.scalar(
         select(Line).where(
             Line.id == data.line_id
@@ -103,11 +102,8 @@ def create_line_assignment(
 
     # Check assigner's scope
 
-
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager can assign only within their group.
+    if role == "GROUP_MANAGER":
         if current_user.organization_unit_id is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -137,7 +133,14 @@ def create_line_assignment(
                 detail="This line is outside your assigned group",
             )
 
-    elif role == "FLOOR_IE":
+    # Floor IE, DPM, APM and In-Charge can assign
+    # only within their assigned unit.
+    elif role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             current_user.organization_unit_id
             != line.organization_unit_id
@@ -147,8 +150,10 @@ def create_line_assignment(
                 detail="This line is outside your assigned unit",
             )
 
-    # Check supervisor's existing active assignment
+    # ADMIN / DGM / CENTRAL_MANAGER have factory-wide access.
+    # No additional scope check is required.
 
+    # Check supervisor's existing active assignment
     existing = (
         line_assignment_service
         .get_active_user_line_assignment(
@@ -165,7 +170,6 @@ def create_line_assignment(
         )
 
     # Create
-
     return line_assignment_service.create_assignment(
         db=db,
         employee_id=data.employee_id,
@@ -174,8 +178,9 @@ def create_line_assignment(
     )
 
 
-
+# ============================================================
 # GET ALL ACTIVE ASSIGNMENTS
+# ============================================================
 
 @router.get(
     "/",
@@ -192,8 +197,10 @@ def get_line_assignments(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if role not in allowed_roles:
@@ -215,13 +222,8 @@ def get_line_assignments(
     }:
         return assignments
 
-
-    # Group Manager / Assistant Manager
-
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager
+    if role == "GROUP_MANAGER":
         if current_user.organization_unit_id is None:
             return []
 
@@ -253,9 +255,13 @@ def get_line_assignments(
 
         return result
 
-    # Floor IE
-
-    if role == "FLOOR_IE":
+    # Floor IE / DPM / APM / In-Charge
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         return [
             assignment
             for assignment in assignments
@@ -321,10 +327,7 @@ def get_line_assignment(
         return assignment
 
     # Group level
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         unit = db.get(
             OrganizationUnit,
             line.organization_unit_id,
@@ -342,8 +345,13 @@ def get_line_assignment(
 
         return assignment
 
-    # Floor IE
-    if role == "FLOOR_IE":
+    # Unit level
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             line.organization_unit_id
             != current_user.organization_unit_id
@@ -430,8 +438,10 @@ def end_line_assignment(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if role not in allowed_roles:
@@ -452,10 +462,7 @@ def end_line_assignment(
         )
 
     # Group scope
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         unit = db.get(
             OrganizationUnit,
             line.organization_unit_id,
@@ -472,7 +479,12 @@ def end_line_assignment(
             )
 
     # Unit scope
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             line.organization_unit_id
             != current_user.organization_unit_id

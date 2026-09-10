@@ -4,10 +4,13 @@ import type {
   OrganizationUnit,
   OrganizationUnitCreate,
   OrganizationUnitUpdate,
+} from "../types/organization";
+
+import type {
   Line,
   LineCreate,
   LineUpdate,
-} from "../types/organization";
+} from "../types/line";
 
 
 // ============================================================
@@ -56,16 +59,30 @@ export async function updateOrganizationUnit(
 // ============================================================
 // LINES
 // ============================================================
+//
+// IMPORTANT:
+// Line operations use the canonical /lines API.
+// ============================================================
+
 
 export async function getUnitLines(
   unitId: number,
 ): Promise<Line[]> {
   const response =
     await api.get<Line[]>(
-      `/organization/${unitId}/lines`,
+      "/lines/"
     );
 
-  return response.data;
+  /*
+   * The backend already applies role-based authorization.
+   *
+   * This filter only selects the requested unit from the
+   * lines that the current user is already allowed to see.
+   */
+  return response.data.filter(
+    (line) =>
+      line.organization_unit_id === unitId
+  );
 }
 
 
@@ -73,10 +90,15 @@ export async function createLine(
   unitId: number,
   data: LineCreate,
 ): Promise<Line> {
+  const payload: LineCreate = {
+    ...data,
+    organization_unit_id: unitId,
+  };
+
   const response =
     await api.post<Line>(
-      `/organization/${unitId}/lines`,
-      data,
+      "/lines/",
+      payload,
     );
 
   return response.data;
@@ -89,7 +111,7 @@ export async function updateLine(
 ): Promise<Line> {
   const response =
     await api.put<Line>(
-      `/organization/lines/${lineId}`,
+      `/lines/${lineId}`,
       data,
     );
 

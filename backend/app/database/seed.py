@@ -23,17 +23,32 @@ ROLES = [
     {
         "name": "Group Manager",
         "code": "GROUP_MANAGER",
-        "description": "Group Manager",
+        "description": "Group-level management access",
     },
     {
         "name": "Floor IE",
         "code": "FLOOR_IE",
-        "description": "Floor Industrial Engineer",
+        "description": "Unit-level operational access",
     },
     {
         "name": "Supervisor",
         "code": "SUPERVISOR",
-        "description": "Line Supervisor",
+        "description": "Line-level operational access",
+    },
+    {
+        "name": "Deputy Production Manager",
+        "code": "DPM",
+        "description": "Unit-level operational access",
+    },
+    {
+        "name": "Assistant Production Manager",
+        "code": "APM",
+        "description": "Unit-level operational access",
+    },
+    {
+        "name": "In-Charge",
+        "code": "IN_CHARGE",
+        "description": "Unit-level operational access",
     },
 ]
 

@@ -44,8 +44,7 @@ def create_line(
     # Check organization unit.
     unit = db.scalar(
         select(OrganizationUnit).where(
-            OrganizationUnit.id
-            == data.organization_unit_id
+            OrganizationUnit.id == data.organization_unit_id
         )
     )
 
@@ -109,13 +108,10 @@ def list_lines(
         return line_service.get_all_lines(db)
 
     # --------------------------------------------------------
-    # GROUP MANAGER / ASSISTANT MANAGER
+    # GROUP MANAGER
     # --------------------------------------------------------
 
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         if current_user.organization_unit_id is None:
             return []
 
@@ -139,10 +135,15 @@ def list_lines(
         )
 
     # --------------------------------------------------------
-    # FLOOR IE
+    # FLOOR IE / DPM / APM / IN-CHARGE
     # --------------------------------------------------------
 
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if current_user.organization_unit_id is None:
             return []
 
@@ -223,13 +224,38 @@ def get_line(
         return line
 
     # --------------------------------------------------------
-    # GROUP MANAGER / ASSISTANT MANAGER
+    # GROUP MANAGER
     # --------------------------------------------------------
 
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
+        # First validate the Group Manager's own organization.
+        if current_user.organization_unit_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not assigned to an organization group",
+            )
+
+        current_organization = db.scalar(
+            select(OrganizationUnit).where(
+                OrganizationUnit.id
+                == current_user.organization_unit_id
+            )
+        )
+
+        if not current_organization:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Your organization was not found",
+            )
+
+        # Group Manager must belong to a GROUP.
+        if current_organization.unit_type != "GROUP":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Group Manager must be assigned to a GROUP",
+            )
+
+        # Get the line's organization unit.
         organization_unit = db.scalar(
             select(OrganizationUnit).where(
                 OrganizationUnit.id
@@ -243,6 +269,8 @@ def get_line(
                 detail="Line organization unit not found",
             )
 
+        # The line's UNIT must directly belong to
+        # the Group Manager's GROUP.
         if (
             organization_unit.parent_id
             != current_user.organization_unit_id
@@ -255,10 +283,15 @@ def get_line(
         return line
 
     # --------------------------------------------------------
-    # FLOOR IE
+    # FLOOR IE / DPM / APM / IN-CHARGE
     # --------------------------------------------------------
 
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             line.organization_unit_id
             != current_user.organization_unit_id

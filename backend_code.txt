@@ -173,7 +173,6 @@ def require_group_access(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
     }
 
     if current_user.role.code not in allowed_roles:
@@ -193,8 +192,10 @@ def require_unit_access(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if current_user.role.code not in allowed_roles:
@@ -214,8 +215,10 @@ def require_line_access(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
         "SUPERVISOR",
     }
 
@@ -326,12 +329,8 @@ def check_group_access(
     }:
         return
 
-    # Group Manager and Assistant Manager
-    # can access only their assigned group.
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager can access only their assigned group.
+    if role == "GROUP_MANAGER":
         from app.models.organization import OrganizationUnit
 
         group = db.scalar(
@@ -391,12 +390,8 @@ def check_unit_access(
     }:
         return
 
-    # Group Manager and Assistant Manager
-    # can access units inside their group.
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager can access units inside their group.
+    if role == "GROUP_MANAGER":
         if not is_unit_in_user_group(
             organization_unit_id,
             current_user,
@@ -409,8 +404,14 @@ def check_unit_access(
 
         return
 
-    # Floor IE can access only their assigned unit.
-    if role == "FLOOR_IE":
+    # Floor IE, DPM, APM and In-Charge
+    # can access only their assigned unit.
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if current_user.organization_unit_id != organization_unit_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -471,13 +472,10 @@ def check_line_access(
         )
 
     # --------------------------------------------------------
-    # Group Manager / Assistant Manager
+    # Group Manager
     # --------------------------------------------------------
 
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         if not is_line_in_user_group(
             line_id,
             current_user,
@@ -491,10 +489,15 @@ def check_line_access(
         return
 
     # --------------------------------------------------------
-    # Floor IE
+    # Floor IE / DPM / APM / In-Charge
     # --------------------------------------------------------
 
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if line.organization_unit_id != current_user.organization_unit_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -546,6 +549,7 @@ FILE 4: backend/app\core\rules.py
 # SFMS - Role & Access Rules
 # ============================================================
 
+
 # ------------------------------------------------------------
 # Role Codes
 # ------------------------------------------------------------
@@ -554,22 +558,24 @@ ADMIN = "ADMIN"
 DGM = "DGM"
 CENTRAL_MANAGER = "CENTRAL_MANAGER"
 GROUP_MANAGER = "GROUP_MANAGER"
-ASSISTANT_MANAGER = "ASSISTANT_MANAGER"
+
 FLOOR_IE = "FLOOR_IE"
+DPM = "DPM"
+APM = "APM"
+IN_CHARGE = "IN_CHARGE"
+
 SUPERVISOR = "SUPERVISOR"
 
 
-# ------------------------------------------------------------
 # Role Groups
-# ------------------------------------------------------------
 
-# Can access and manage everything
+# Full system access
 ALL_ACCESS_ROLES = {
     ADMIN,
 }
 
 
-# Can see the entire factory
+# Can access the entire factory
 FACTORY_VIEW_ROLES = {
     ADMIN,
     DGM,
@@ -580,13 +586,15 @@ FACTORY_VIEW_ROLES = {
 # Can work within their assigned group
 GROUP_ROLES = {
     GROUP_MANAGER,
-    ASSISTANT_MANAGER,
 }
 
 
 # Can work within their assigned unit
 UNIT_ROLES = {
     FLOOR_IE,
+    DPM,
+    APM,
+    IN_CHARGE,
 }
 
 
@@ -633,27 +641,22 @@ def get_dashboard_scope(role_code: str) -> str:
         GROUP
         UNIT
         LINE
+        NONE
     """
 
-    if role_code == ADMIN:
+    if role_code in ALL_ACCESS_ROLES:
         return "ALL"
 
-    if role_code in {
-        DGM,
-        CENTRAL_MANAGER,
-    }:
+    if role_code in FACTORY_VIEW_ROLES:
         return "ALL"
 
-    if role_code in {
-        GROUP_MANAGER,
-        ASSISTANT_MANAGER,
-    }:
+    if role_code in GROUP_ROLES:
         return "GROUP"
 
-    if role_code == FLOOR_IE:
+    if role_code in UNIT_ROLES:
         return "UNIT"
 
-    if role_code == SUPERVISOR:
+    if role_code in LINE_ROLES:
         return "LINE"
 
     return "NONE"
@@ -665,14 +668,14 @@ def get_dashboard_scope(role_code: str) -> str:
 
 def can_manage_users(role_code: str) -> bool:
     """
-    User creation/update/deactivation.
+    General user management permission.
 
-    Admin:
-        Full access.
+    ADMIN:
+        Full user management.
 
     DGM / Central Manager:
-        Can update employee information according
-        to the application rules.
+        Employee information management according
+        to application rules.
 
     Others:
         No general user management.
@@ -680,8 +683,8 @@ def can_manage_users(role_code: str) -> bool:
 
     return role_code in {
         ADMIN,
-        DGM,
-        CENTRAL_MANAGER,
+        # DGM,
+        # CENTRAL_MANAGER,
     }
 
 
@@ -719,8 +722,10 @@ def can_assign_lines(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
     }
 
 
@@ -734,8 +739,10 @@ def can_view_production(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -746,8 +753,10 @@ def can_update_production(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -762,8 +771,10 @@ def can_view_line_status(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -774,8 +785,10 @@ def can_update_line_status(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -790,8 +803,10 @@ def can_view_layout(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -802,8 +817,10 @@ def can_update_layout(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -818,8 +835,10 @@ def can_view_reports(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -842,7 +861,6 @@ def can_access_group(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
     }
 
 
@@ -852,8 +870,10 @@ def can_access_unit(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
     }
 
 
@@ -863,8 +883,10 @@ def can_access_line(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -1144,17 +1166,32 @@ ROLES = [
     {
         "name": "Group Manager",
         "code": "GROUP_MANAGER",
-        "description": "Group Manager",
+        "description": "Group-level management access",
     },
     {
         "name": "Floor IE",
         "code": "FLOOR_IE",
-        "description": "Floor Industrial Engineer",
+        "description": "Unit-level operational access",
     },
     {
         "name": "Supervisor",
         "code": "SUPERVISOR",
-        "description": "Line Supervisor",
+        "description": "Line-level operational access",
+    },
+    {
+        "name": "Deputy Production Manager",
+        "code": "DPM",
+        "description": "Unit-level operational access",
+    },
+    {
+        "name": "Assistant Production Manager",
+        "code": "APM",
+        "description": "Unit-level operational access",
+    },
+    {
+        "name": "In-Charge",
+        "code": "IN_CHARGE",
+        "description": "Unit-level operational access",
     },
 ]
 
@@ -2968,14 +3005,15 @@ def create_line_assignment(
     role = current_user.role.code
 
     # Permission
-
     allowed_roles = {
         "ADMIN",
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if role not in allowed_roles:
@@ -2985,7 +3023,6 @@ def create_line_assignment(
         )
 
     # Get employee
-
     employee = db.scalar(
         select(User).where(
             User.employee_id == data.employee_id
@@ -3012,7 +3049,6 @@ def create_line_assignment(
         )
 
     # Get line
-    
     line = db.scalar(
         select(Line).where(
             Line.id == data.line_id
@@ -3033,11 +3069,8 @@ def create_line_assignment(
 
     # Check assigner's scope
 
-
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager can assign only within their group.
+    if role == "GROUP_MANAGER":
         if current_user.organization_unit_id is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -3067,7 +3100,14 @@ def create_line_assignment(
                 detail="This line is outside your assigned group",
             )
 
-    elif role == "FLOOR_IE":
+    # Floor IE, DPM, APM and In-Charge can assign
+    # only within their assigned unit.
+    elif role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             current_user.organization_unit_id
             != line.organization_unit_id
@@ -3077,8 +3117,10 @@ def create_line_assignment(
                 detail="This line is outside your assigned unit",
             )
 
-    # Check supervisor's existing active assignment
+    # ADMIN / DGM / CENTRAL_MANAGER have factory-wide access.
+    # No additional scope check is required.
 
+    # Check supervisor's existing active assignment
     existing = (
         line_assignment_service
         .get_active_user_line_assignment(
@@ -3095,7 +3137,6 @@ def create_line_assignment(
         )
 
     # Create
-
     return line_assignment_service.create_assignment(
         db=db,
         employee_id=data.employee_id,
@@ -3104,8 +3145,9 @@ def create_line_assignment(
     )
 
 
-
+# ============================================================
 # GET ALL ACTIVE ASSIGNMENTS
+# ============================================================
 
 @router.get(
     "/",
@@ -3122,8 +3164,10 @@ def get_line_assignments(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if role not in allowed_roles:
@@ -3145,13 +3189,8 @@ def get_line_assignments(
     }:
         return assignments
 
-
-    # Group Manager / Assistant Manager
-
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager
+    if role == "GROUP_MANAGER":
         if current_user.organization_unit_id is None:
             return []
 
@@ -3183,9 +3222,13 @@ def get_line_assignments(
 
         return result
 
-    # Floor IE
-
-    if role == "FLOOR_IE":
+    # Floor IE / DPM / APM / In-Charge
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         return [
             assignment
             for assignment in assignments
@@ -3251,10 +3294,7 @@ def get_line_assignment(
         return assignment
 
     # Group level
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         unit = db.get(
             OrganizationUnit,
             line.organization_unit_id,
@@ -3272,8 +3312,13 @@ def get_line_assignment(
 
         return assignment
 
-    # Floor IE
-    if role == "FLOOR_IE":
+    # Unit level
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             line.organization_unit_id
             != current_user.organization_unit_id
@@ -3360,8 +3405,10 @@ def end_line_assignment(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if role not in allowed_roles:
@@ -3382,10 +3429,7 @@ def end_line_assignment(
         )
 
     # Group scope
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         unit = db.get(
             OrganizationUnit,
             line.organization_unit_id,
@@ -3402,7 +3446,12 @@ def end_line_assignment(
             )
 
     # Unit scope
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             line.organization_unit_id
             != current_user.organization_unit_id
@@ -3679,8 +3728,7 @@ def create_line(
     # Check organization unit.
     unit = db.scalar(
         select(OrganizationUnit).where(
-            OrganizationUnit.id
-            == data.organization_unit_id
+            OrganizationUnit.id == data.organization_unit_id
         )
     )
 
@@ -3744,13 +3792,10 @@ def list_lines(
         return line_service.get_all_lines(db)
 
     # --------------------------------------------------------
-    # GROUP MANAGER / ASSISTANT MANAGER
+    # GROUP MANAGER
     # --------------------------------------------------------
 
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         if current_user.organization_unit_id is None:
             return []
 
@@ -3774,10 +3819,15 @@ def list_lines(
         )
 
     # --------------------------------------------------------
-    # FLOOR IE
+    # FLOOR IE / DPM / APM / IN-CHARGE
     # --------------------------------------------------------
 
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if current_user.organization_unit_id is None:
             return []
 
@@ -3858,13 +3908,38 @@ def get_line(
         return line
 
     # --------------------------------------------------------
-    # GROUP MANAGER / ASSISTANT MANAGER
+    # GROUP MANAGER
     # --------------------------------------------------------
 
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
+        # First validate the Group Manager's own organization.
+        if current_user.organization_unit_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not assigned to an organization group",
+            )
+
+        current_organization = db.scalar(
+            select(OrganizationUnit).where(
+                OrganizationUnit.id
+                == current_user.organization_unit_id
+            )
+        )
+
+        if not current_organization:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Your organization was not found",
+            )
+
+        # Group Manager must belong to a GROUP.
+        if current_organization.unit_type != "GROUP":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Group Manager must be assigned to a GROUP",
+            )
+
+        # Get the line's organization unit.
         organization_unit = db.scalar(
             select(OrganizationUnit).where(
                 OrganizationUnit.id
@@ -3878,6 +3953,8 @@ def get_line(
                 detail="Line organization unit not found",
             )
 
+        # The line's UNIT must directly belong to
+        # the Group Manager's GROUP.
         if (
             organization_unit.parent_id
             != current_user.organization_unit_id
@@ -3890,10 +3967,15 @@ def get_line(
         return line
 
     # --------------------------------------------------------
-    # FLOOR IE
+    # FLOOR IE / DPM / APM / IN-CHARGE
     # --------------------------------------------------------
 
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if (
             line.organization_unit_id
             != current_user.organization_unit_id
@@ -4031,6 +4113,7 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user, get_db
 from app.models.line import Line
+from app.models.line_assignment import LineAssignment
 from app.models.organization import OrganizationUnit
 from app.models.user import User
 from app.schemas.organization import (
@@ -4049,7 +4132,31 @@ router = APIRouter(
 )
 
 
+# ============================================================
+# ROLE GROUPS
+# ============================================================
+
+MANAGEMENT_ROLES = {
+    "ADMIN",
+    "DGM",
+    "CENTRAL_MANAGER",
+}
+
+UNIT_MANAGEMENT_ROLES = {
+    "FLOOR_IE",
+    "DPM",
+    "APM",
+    "IN_CHARGE",
+}
+
+GROUP_MANAGEMENT_ROLES = {
+    "GROUP_MANAGER",
+}
+
+
+# ============================================================
 # ADMIN CHECK
+# ============================================================
 
 def require_admin_user(
     current_user: User = Depends(get_current_user),
@@ -4063,7 +4170,9 @@ def require_admin_user(
     return current_user
 
 
+# ============================================================
 # HELPERS
+# ============================================================
 
 def validate_unit_type(unit_type: str) -> str:
     value = unit_type.strip().upper()
@@ -4083,6 +4192,10 @@ def validate_parent_for_unit(
     parent_id: int | None,
 ) -> None:
 
+    # --------------------------------------------------------
+    # GROUP
+    # --------------------------------------------------------
+
     if unit_type == "GROUP":
 
         if parent_id is not None:
@@ -4093,7 +4206,10 @@ def validate_parent_for_unit(
 
         return
 
+    # --------------------------------------------------------
     # UNIT
+    # --------------------------------------------------------
+
     if parent_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -4135,7 +4251,6 @@ def validate_not_descendant(
         )
 
     current_id = new_parent_id
-
     visited: set[int] = set()
 
     while current_id is not None:
@@ -4206,7 +4321,143 @@ def get_line(
     return line
 
 
+# ============================================================
+# ORGANIZATION ACCESS HELPERS
+# ============================================================
+
+def can_access_organization(
+    db: Session,
+    current_user: User,
+    organization_unit: OrganizationUnit,
+) -> bool:
+
+    role = current_user.role.code
+
+    # --------------------------------------------------------
+    # ADMIN / MANAGEMENT
+    # --------------------------------------------------------
+
+    if role in MANAGEMENT_ROLES:
+        return True
+
+    # --------------------------------------------------------
+    # GROUP MANAGER
+    # --------------------------------------------------------
+
+    if role in GROUP_MANAGEMENT_ROLES:
+
+        group_id = current_user.organization_unit_id
+
+        if not group_id:
+            return False
+
+        # Can access their own group
+        if organization_unit.id == group_id:
+            return True
+
+        # Can access units directly under their group
+        return organization_unit.parent_id == group_id
+
+    # --------------------------------------------------------
+    # FLOOR IE / DPM / APM / IN_CHARGE
+    # --------------------------------------------------------
+
+    if role in UNIT_MANAGEMENT_ROLES:
+
+        return (
+            current_user.organization_unit_id
+            == organization_unit.id
+        )
+
+    # --------------------------------------------------------
+    # SUPERVISOR
+    # --------------------------------------------------------
+
+    if role == "SUPERVISOR":
+
+        return (
+            current_user.organization_unit_id
+            == organization_unit.id
+        )
+
+    return False
+
+
+def can_access_line(
+    db: Session,
+    current_user: User,
+    line: Line,
+) -> bool:
+
+    role = current_user.role.code
+
+    # --------------------------------------------------------
+    # ADMIN / MANAGEMENT
+    # --------------------------------------------------------
+
+    if role in MANAGEMENT_ROLES:
+        return True
+
+    # --------------------------------------------------------
+    # GET LINE'S ORGANIZATION UNIT
+    # --------------------------------------------------------
+
+    unit = db.scalar(
+        select(OrganizationUnit).where(
+            OrganizationUnit.id == line.organization_unit_id
+        )
+    )
+
+    if not unit:
+        return False
+
+    # --------------------------------------------------------
+    # GROUP MANAGER
+    # --------------------------------------------------------
+
+    if role in GROUP_MANAGEMENT_ROLES:
+
+        group_id = current_user.organization_unit_id
+
+        if not group_id:
+            return False
+
+        return unit.parent_id == group_id
+
+    # --------------------------------------------------------
+    # FLOOR IE / DPM / APM / IN_CHARGE
+    # --------------------------------------------------------
+
+    if role in UNIT_MANAGEMENT_ROLES:
+
+        return (
+            current_user.organization_unit_id
+            == line.organization_unit_id
+        )
+
+    # --------------------------------------------------------
+    # SUPERVISOR
+    # --------------------------------------------------------
+
+    if role == "SUPERVISOR":
+
+        assignment = db.scalar(
+            select(LineAssignment).where(
+                LineAssignment.employee_id
+                == current_user.employee_id,
+                LineAssignment.line_id == line.id,
+                LineAssignment.is_active.is_(True),
+            )
+        )
+
+        return assignment is not None
+
+    return False
+
+
+# ============================================================
 # LIST ORGANIZATION
+# ============================================================
 
 @router.get(
     "/",
@@ -4216,14 +4467,15 @@ def list_organization_units(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+
     role = current_user.role.code
 
-    # ADMIN / MANAGEMENT ROLES CAN VIEW EVERYTHING
-    if role in {
-        "ADMIN",
-        "DGM",
-        "CENTRAL_MANAGER",
-    }:
+    # --------------------------------------------------------
+    # ADMIN / MANAGEMENT ROLES
+    # --------------------------------------------------------
+
+    if role in MANAGEMENT_ROLES:
+
         return db.scalars(
             select(OrganizationUnit)
             .order_by(
@@ -4232,11 +4484,11 @@ def list_organization_units(
             )
         ).all()
 
+    # --------------------------------------------------------
     # GROUP MANAGER
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # --------------------------------------------------------
+
+    if role in GROUP_MANAGEMENT_ROLES:
 
         group_id = current_user.organization_unit_id
 
@@ -4249,11 +4501,34 @@ def list_organization_units(
                 (OrganizationUnit.id == group_id)
                 | (OrganizationUnit.parent_id == group_id)
             )
-            .order_by(OrganizationUnit.code)
+            .order_by(
+                OrganizationUnit.code
+            )
         ).all()
 
-    # FLOOR IE
-    if role == "FLOOR_IE":
+    # --------------------------------------------------------
+    # FLOOR IE / DPM / APM / IN_CHARGE
+    # --------------------------------------------------------
+
+    if role in UNIT_MANAGEMENT_ROLES:
+
+        if not current_user.organization_unit_id:
+            return []
+
+        unit = db.scalar(
+            select(OrganizationUnit).where(
+                OrganizationUnit.id
+                == current_user.organization_unit_id
+            )
+        )
+
+        return [unit] if unit else []
+
+    # --------------------------------------------------------
+    # SUPERVISOR
+    # --------------------------------------------------------
+
+    if role == "SUPERVISOR":
 
         if not current_user.organization_unit_id:
             return []
@@ -4270,7 +4545,9 @@ def list_organization_units(
     return []
 
 
+# ============================================================
 # GET ONE ORGANIZATION UNIT
+# ============================================================
 
 @router.get(
     "/{organization_unit_id}",
@@ -4287,22 +4564,22 @@ def get_organization_unit(
         organization_unit_id,
     )
 
-    role = current_user.role.code
+    if not can_access_organization(
+        db,
+        current_user,
+        organization_unit,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this organization",
+        )
 
-    if role in {
-        "ADMIN",
-        "DGM",
-        "CENTRAL_MANAGER",
-    }:
-        return organization_unit
-
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="You do not have access to this organization",
-    )
+    return organization_unit
 
 
+# ============================================================
 # CREATE ORGANIZATION UNIT
+# ============================================================
 
 @router.post(
     "/",
@@ -4319,11 +4596,19 @@ def create_organization_unit(
     code = data.code.strip()
     unit_type = validate_unit_type(data.unit_type)
 
+    # --------------------------------------------------------
+    # VALIDATE NAME
+    # --------------------------------------------------------
+
     if not name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Organization name is required",
         )
+
+    # --------------------------------------------------------
+    # VALIDATE CODE
+    # --------------------------------------------------------
 
     if not code:
         raise HTTPException(
@@ -4331,7 +4616,10 @@ def create_organization_unit(
             detail="Organization code is required",
         )
 
+    # --------------------------------------------------------
     # CODE MUST BE UNIQUE
+    # --------------------------------------------------------
+
     existing = db.scalar(
         select(OrganizationUnit).where(
             OrganizationUnit.code == code
@@ -4344,11 +4632,19 @@ def create_organization_unit(
             detail="Organization code already exists",
         )
 
+    # --------------------------------------------------------
+    # VALIDATE PARENT
+    # --------------------------------------------------------
+
     validate_parent_for_unit(
         db,
         unit_type,
         data.parent_id,
     )
+
+    # --------------------------------------------------------
+    # CREATE
+    # --------------------------------------------------------
 
     organization_unit = OrganizationUnit(
         name=name,
@@ -4365,7 +4661,9 @@ def create_organization_unit(
     return organization_unit
 
 
+# ============================================================
 # UPDATE ORGANIZATION UNIT
+# ============================================================
 
 @router.put(
     "/{organization_unit_id}",
@@ -4383,11 +4681,19 @@ def update_organization_unit(
         organization_unit_id,
     )
 
+    # --------------------------------------------------------
+    # NEW NAME
+    # --------------------------------------------------------
+
     new_name = (
         data.name.strip()
         if data.name is not None
         else organization_unit.name
     )
+
+    # --------------------------------------------------------
+    # NEW CODE
+    # --------------------------------------------------------
 
     new_code = (
         data.code.strip()
@@ -4395,11 +4701,19 @@ def update_organization_unit(
         else organization_unit.code
     )
 
+    # --------------------------------------------------------
+    # NEW TYPE
+    # --------------------------------------------------------
+
     new_type = (
         validate_unit_type(data.unit_type)
         if data.unit_type is not None
         else organization_unit.unit_type
     )
+
+    # --------------------------------------------------------
+    # NEW PARENT
+    # --------------------------------------------------------
 
     new_parent_id = (
         data.parent_id
@@ -4407,11 +4721,19 @@ def update_organization_unit(
         else organization_unit.parent_id
     )
 
+    # --------------------------------------------------------
+    # VALIDATE NAME
+    # --------------------------------------------------------
+
     if not new_name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Organization name is required",
         )
+
+    # --------------------------------------------------------
+    # VALIDATE CODE
+    # --------------------------------------------------------
 
     if not new_code:
         raise HTTPException(
@@ -4419,7 +4741,10 @@ def update_organization_unit(
             detail="Organization code is required",
         )
 
+    # --------------------------------------------------------
     # CHECK DUPLICATE CODE
+    # --------------------------------------------------------
+
     duplicate = db.scalar(
         select(OrganizationUnit).where(
             OrganizationUnit.code == new_code,
@@ -4433,18 +4758,29 @@ def update_organization_unit(
             detail="Organization code already exists",
         )
 
+    # --------------------------------------------------------
     # VALIDATE PARENT
+    # --------------------------------------------------------
+
     validate_parent_for_unit(
         db,
         new_type,
         new_parent_id,
     )
 
+    # --------------------------------------------------------
+    # PREVENT CIRCULAR HIERARCHY
+    # --------------------------------------------------------
+
     validate_not_descendant(
         db,
         organization_unit_id,
         new_parent_id,
     )
+
+    # --------------------------------------------------------
+    # UPDATE
+    # --------------------------------------------------------
 
     organization_unit.name = new_name
     organization_unit.code = new_code
@@ -4460,7 +4796,9 @@ def update_organization_unit(
     return organization_unit
 
 
-# LIST LINES
+# ============================================================
+# LIST LINES FOR ORGANIZATION UNIT
+# ============================================================
 
 @router.get(
     "/{organization_unit_id}/lines",
@@ -4472,22 +4810,147 @@ def list_unit_lines(
     current_user: User = Depends(get_current_user),
 ):
 
-    get_unit(
+    # --------------------------------------------------------
+    # GET UNIT
+    # --------------------------------------------------------
+
+    unit = get_unit(
         db,
         organization_unit_id,
     )
 
-    return db.scalars(
-        select(Line)
-        .where(
-            Line.organization_unit_id
-            == organization_unit_id
+    # --------------------------------------------------------
+    # LINES CAN ONLY BELONG TO UNIT
+    # --------------------------------------------------------
+
+    if unit.unit_type != "UNIT":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Lines can only be requested for a UNIT",
         )
-        .order_by(Line.line_number)
-    ).all()
+
+    role = current_user.role.code
+
+    # --------------------------------------------------------
+    # ADMIN / MANAGEMENT
+    # --------------------------------------------------------
+
+    if role in MANAGEMENT_ROLES:
+
+        return db.scalars(
+            select(Line)
+            .where(
+                Line.organization_unit_id
+                == organization_unit_id
+            )
+            .order_by(
+                Line.line_number
+            )
+        ).all()
+
+    # --------------------------------------------------------
+    # GROUP MANAGER
+    # --------------------------------------------------------
+
+    if role in GROUP_MANAGEMENT_ROLES:
+
+        group_id = current_user.organization_unit_id
+
+        if not group_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not assigned to an organization group",
+            )
+
+        if unit.parent_id != group_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this unit",
+            )
+
+        return db.scalars(
+            select(Line)
+            .where(
+                Line.organization_unit_id
+                == organization_unit_id
+            )
+            .order_by(
+                Line.line_number
+            )
+        ).all()
+
+    # --------------------------------------------------------
+    # FLOOR IE / DPM / APM / IN_CHARGE
+    # --------------------------------------------------------
+
+    if role in UNIT_MANAGEMENT_ROLES:
+
+        if (
+            current_user.organization_unit_id
+            != organization_unit_id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this unit",
+            )
+
+        return db.scalars(
+            select(Line)
+            .where(
+                Line.organization_unit_id
+                == organization_unit_id
+            )
+            .order_by(
+                Line.line_number
+            )
+        ).all()
+
+    # --------------------------------------------------------
+    # SUPERVISOR
+    # --------------------------------------------------------
+
+    if role == "SUPERVISOR":
+
+        if (
+            current_user.organization_unit_id
+            != organization_unit_id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this unit",
+            )
+
+        return db.scalars(
+            select(Line)
+            .join(
+                LineAssignment,
+                LineAssignment.line_id == Line.id,
+            )
+            .where(
+                Line.organization_unit_id
+                == organization_unit_id,
+                LineAssignment.employee_id
+                == current_user.employee_id,
+                LineAssignment.is_active.is_(True),
+            )
+            .order_by(
+                Line.line_number
+            )
+        ).all()
+
+    # --------------------------------------------------------
+    # OTHER ROLES
+    # --------------------------------------------------------
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You do not have access to lines",
+    )
 
 
+# ============================================================
 # CREATE LINE
+# ============================================================
 
 @router.post(
     "/{organization_unit_id}/lines",
@@ -4501,10 +4964,18 @@ def create_line(
     current_user: User = Depends(require_admin_user),
 ):
 
+    # --------------------------------------------------------
+    # GET UNIT
+    # --------------------------------------------------------
+
     unit = get_unit(
         db,
         organization_unit_id,
     )
+
+    # --------------------------------------------------------
+    # ONLY UNIT CAN HAVE LINES
+    # --------------------------------------------------------
 
     if unit.unit_type != "UNIT":
         raise HTTPException(
@@ -4512,11 +4983,19 @@ def create_line(
             detail="Lines can only belong to a UNIT",
         )
 
+    # --------------------------------------------------------
+    # VALIDATE LINE NUMBER
+    # --------------------------------------------------------
+
     if data.line_number <= 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Line number must be positive",
         )
+
+    # --------------------------------------------------------
+    # VALIDATE NAME
+    # --------------------------------------------------------
 
     if not data.name.strip():
         raise HTTPException(
@@ -4524,7 +5003,10 @@ def create_line(
             detail="Line name is required",
         )
 
+    # --------------------------------------------------------
     # LINE NUMBER MUST BE UNIQUE
+    # --------------------------------------------------------
+
     existing = db.scalar(
         select(Line).where(
             Line.line_number == data.line_number
@@ -4536,6 +5018,10 @@ def create_line(
             status_code=status.HTTP_409_CONFLICT,
             detail="Line number already exists",
         )
+
+    # --------------------------------------------------------
+    # CREATE LINE
+    # --------------------------------------------------------
 
     line = Line(
         line_number=data.line_number,
@@ -4551,7 +5037,9 @@ def create_line(
     return line
 
 
+# ============================================================
 # UPDATE LINE
+# ============================================================
 
 @router.put(
     "/lines/{line_id}",
@@ -4564,10 +5052,18 @@ def update_line(
     current_user: User = Depends(require_admin_user),
 ):
 
+    # --------------------------------------------------------
+    # GET LINE
+    # --------------------------------------------------------
+
     line = get_line(
         db,
         line_id,
     )
+
+    # --------------------------------------------------------
+    # NEW LINE NUMBER
+    # --------------------------------------------------------
 
     new_line_number = (
         data.line_number
@@ -4575,11 +5071,19 @@ def update_line(
         else line.line_number
     )
 
+    # --------------------------------------------------------
+    # NEW NAME
+    # --------------------------------------------------------
+
     new_name = (
         data.name.strip()
         if data.name is not None
         else line.name
     )
+
+    # --------------------------------------------------------
+    # NEW UNIT
+    # --------------------------------------------------------
 
     new_unit_id = (
         data.organization_unit_id
@@ -4587,11 +5091,19 @@ def update_line(
         else line.organization_unit_id
     )
 
+    # --------------------------------------------------------
+    # VALIDATE LINE NUMBER
+    # --------------------------------------------------------
+
     if new_line_number <= 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Line number must be positive",
         )
+
+    # --------------------------------------------------------
+    # VALIDATE NAME
+    # --------------------------------------------------------
 
     if not new_name:
         raise HTTPException(
@@ -4599,7 +5111,10 @@ def update_line(
             detail="Line name is required",
         )
 
+    # --------------------------------------------------------
     # VALIDATE UNIT
+    # --------------------------------------------------------
+
     unit = get_unit(
         db,
         new_unit_id,
@@ -4611,7 +5126,10 @@ def update_line(
             detail="A line can only belong to a UNIT",
         )
 
+    # --------------------------------------------------------
     # CHECK DUPLICATE LINE NUMBER
+    # --------------------------------------------------------
+
     duplicate = db.scalar(
         select(Line).where(
             Line.line_number == new_line_number,
@@ -4624,6 +5142,10 @@ def update_line(
             status_code=status.HTTP_409_CONFLICT,
             detail="Line number already exists",
         )
+
+    # --------------------------------------------------------
+    # UPDATE
+    # --------------------------------------------------------
 
     line.line_number = new_line_number
     line.name = new_name
@@ -4638,7 +5160,9 @@ def update_line(
     return line
 
 
-# GET LINE
+# ============================================================
+# GET SINGLE LINE
+# ============================================================
 
 @router.get(
     "/lines/{line_id}",
@@ -4650,10 +5174,30 @@ def get_line_endpoint(
     current_user: User = Depends(get_current_user),
 ):
 
-    return get_line(
+    # --------------------------------------------------------
+    # GET LINE
+    # --------------------------------------------------------
+
+    line = get_line(
         db,
         line_id,
     )
+
+    # --------------------------------------------------------
+    # CHECK ROLE / SCOPE
+    # --------------------------------------------------------
+
+    if not can_access_line(
+        db,
+        current_user,
+        line,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this line",
+        )
+
+    return line
 
 
 ====================================================================================================
@@ -5433,8 +5977,14 @@ class UserUpdate(BaseModel):
     designation: str | None = None
     email: EmailStr | None = None
     password: str | None = None
-    role_id: int | None = Field(default=None, gt=0)
-    organization_unit_id: int | None = Field(default=None, gt=0)
+    role_id: int | None = Field(
+        default=None,
+        gt=0,
+    )
+    organization_unit_id: int | None = Field(
+        default=None,
+        gt=0,
+    )
     is_active: bool | None = None
 
 

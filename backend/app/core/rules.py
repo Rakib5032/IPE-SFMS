@@ -2,6 +2,7 @@
 # SFMS - Role & Access Rules
 # ============================================================
 
+
 # ------------------------------------------------------------
 # Role Codes
 # ------------------------------------------------------------
@@ -10,22 +11,24 @@ ADMIN = "ADMIN"
 DGM = "DGM"
 CENTRAL_MANAGER = "CENTRAL_MANAGER"
 GROUP_MANAGER = "GROUP_MANAGER"
-ASSISTANT_MANAGER = "ASSISTANT_MANAGER"
+
 FLOOR_IE = "FLOOR_IE"
+DPM = "DPM"
+APM = "APM"
+IN_CHARGE = "IN_CHARGE"
+
 SUPERVISOR = "SUPERVISOR"
 
 
-# ------------------------------------------------------------
 # Role Groups
-# ------------------------------------------------------------
 
-# Can access and manage everything
+# Full system access
 ALL_ACCESS_ROLES = {
     ADMIN,
 }
 
 
-# Can see the entire factory
+# Can access the entire factory
 FACTORY_VIEW_ROLES = {
     ADMIN,
     DGM,
@@ -36,13 +39,15 @@ FACTORY_VIEW_ROLES = {
 # Can work within their assigned group
 GROUP_ROLES = {
     GROUP_MANAGER,
-    ASSISTANT_MANAGER,
 }
 
 
 # Can work within their assigned unit
 UNIT_ROLES = {
     FLOOR_IE,
+    DPM,
+    APM,
+    IN_CHARGE,
 }
 
 
@@ -89,27 +94,22 @@ def get_dashboard_scope(role_code: str) -> str:
         GROUP
         UNIT
         LINE
+        NONE
     """
 
-    if role_code == ADMIN:
+    if role_code in ALL_ACCESS_ROLES:
         return "ALL"
 
-    if role_code in {
-        DGM,
-        CENTRAL_MANAGER,
-    }:
+    if role_code in FACTORY_VIEW_ROLES:
         return "ALL"
 
-    if role_code in {
-        GROUP_MANAGER,
-        ASSISTANT_MANAGER,
-    }:
+    if role_code in GROUP_ROLES:
         return "GROUP"
 
-    if role_code == FLOOR_IE:
+    if role_code in UNIT_ROLES:
         return "UNIT"
 
-    if role_code == SUPERVISOR:
+    if role_code in LINE_ROLES:
         return "LINE"
 
     return "NONE"
@@ -121,14 +121,14 @@ def get_dashboard_scope(role_code: str) -> str:
 
 def can_manage_users(role_code: str) -> bool:
     """
-    User creation/update/deactivation.
+    General user management permission.
 
-    Admin:
-        Full access.
+    ADMIN:
+        Full user management.
 
     DGM / Central Manager:
-        Can update employee information according
-        to the application rules.
+        Employee information management according
+        to application rules.
 
     Others:
         No general user management.
@@ -136,8 +136,8 @@ def can_manage_users(role_code: str) -> bool:
 
     return role_code in {
         ADMIN,
-        DGM,
-        CENTRAL_MANAGER,
+        # DGM,
+        # CENTRAL_MANAGER,
     }
 
 
@@ -175,8 +175,10 @@ def can_assign_lines(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
     }
 
 
@@ -190,8 +192,10 @@ def can_view_production(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -202,8 +206,10 @@ def can_update_production(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -218,8 +224,10 @@ def can_view_line_status(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -230,8 +238,10 @@ def can_update_line_status(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -246,8 +256,10 @@ def can_view_layout(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -258,8 +270,10 @@ def can_update_layout(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -274,8 +288,10 @@ def can_view_reports(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }
 
@@ -298,7 +314,6 @@ def can_access_group(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
     }
 
 
@@ -308,8 +323,10 @@ def can_access_unit(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
     }
 
 
@@ -319,7 +336,9 @@ def can_access_line(role_code: str) -> bool:
         DGM,
         CENTRAL_MANAGER,
         GROUP_MANAGER,
-        ASSISTANT_MANAGER,
         FLOOR_IE,
+        DPM,
+        APM,
+        IN_CHARGE,
         SUPERVISOR,
     }

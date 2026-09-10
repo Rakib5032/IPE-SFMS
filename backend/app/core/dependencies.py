@@ -127,7 +127,6 @@ def require_group_access(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
     }
 
     if current_user.role.code not in allowed_roles:
@@ -147,8 +146,10 @@ def require_unit_access(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
     }
 
     if current_user.role.code not in allowed_roles:
@@ -168,8 +169,10 @@ def require_line_access(
         "DGM",
         "CENTRAL_MANAGER",
         "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
         "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
         "SUPERVISOR",
     }
 
@@ -280,12 +283,8 @@ def check_group_access(
     }:
         return
 
-    # Group Manager and Assistant Manager
-    # can access only their assigned group.
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager can access only their assigned group.
+    if role == "GROUP_MANAGER":
         from app.models.organization import OrganizationUnit
 
         group = db.scalar(
@@ -345,12 +344,8 @@ def check_unit_access(
     }:
         return
 
-    # Group Manager and Assistant Manager
-    # can access units inside their group.
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    # Group Manager can access units inside their group.
+    if role == "GROUP_MANAGER":
         if not is_unit_in_user_group(
             organization_unit_id,
             current_user,
@@ -363,8 +358,14 @@ def check_unit_access(
 
         return
 
-    # Floor IE can access only their assigned unit.
-    if role == "FLOOR_IE":
+    # Floor IE, DPM, APM and In-Charge
+    # can access only their assigned unit.
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if current_user.organization_unit_id != organization_unit_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -425,13 +426,10 @@ def check_line_access(
         )
 
     # --------------------------------------------------------
-    # Group Manager / Assistant Manager
+    # Group Manager
     # --------------------------------------------------------
 
-    if role in {
-        "GROUP_MANAGER",
-        "ASSISTANT_MANAGER",
-    }:
+    if role == "GROUP_MANAGER":
         if not is_line_in_user_group(
             line_id,
             current_user,
@@ -445,10 +443,15 @@ def check_line_access(
         return
 
     # --------------------------------------------------------
-    # Floor IE
+    # Floor IE / DPM / APM / In-Charge
     # --------------------------------------------------------
 
-    if role == "FLOOR_IE":
+    if role in {
+        "FLOOR_IE",
+        "DPM",
+        "APM",
+        "IN_CHARGE",
+    }:
         if line.organization_unit_id != current_user.organization_unit_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

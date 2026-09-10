@@ -31,6 +31,8 @@ import type {
 
 import DashboardLayout from "../../layouts/DashboardLayout";
 
+import Toast from "../../components/common/Toast";
+import type { ToastType } from "../../components/common/Toast";
 // ============================================================
 // ROLE CONFIGURATION
 // ============================================================
@@ -161,6 +163,12 @@ function getOrganization(
 
 function Users() {
 
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
+
   // ==========================================================
   // PAGE MODE
   // ==========================================================
@@ -176,12 +184,6 @@ function Users() {
 
   const [loading, setLoading] =
     useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [message, setMessage] =
-    useState("");
 
 
   // ==========================================================
@@ -235,7 +237,7 @@ function Users() {
       employee_id: 0,
       full_name: "",
       designation: "",
-      email: "",
+      email: null,
       password: "",
       role_id: 0,
       organization_unit_id: null,
@@ -267,8 +269,9 @@ function Users() {
 
         console.error(err);
 
-        setError(
+        showToast(
           "Unable to load organization structure.",
+          "error",
         );
 
       } finally {
@@ -335,8 +338,17 @@ function Users() {
   // ==========================================================
 
   function clearMessages() {
-    setError("");
-    setMessage("");
+    setToast(null);
+  }
+
+  function showToast(
+    message: string,
+    type: ToastType,
+  ) {
+    setToast({
+      message,
+      type,
+    });
   }
 
 
@@ -529,8 +541,9 @@ function Users() {
       id <= 0
     ) {
 
-      setError(
+      showToast(
         "Please enter a valid Employee ID.",
+        "warning",
       );
 
       return;
@@ -566,9 +579,10 @@ function Users() {
 
       console.error(err);
 
-      setError(
+      showToast(
         err.response?.data?.detail ??
         "Employee could not be found.",
+        "error",
       );
 
     } finally {
@@ -669,17 +683,19 @@ function Users() {
         updatedUser.organization_unit_id,
       );
 
-      setMessage(
+      showToast(
         "User updated successfully.",
+        "success",
       );
 
     } catch (err: any) {
 
       console.error(err);
 
-      setError(
+      showToast(
         err.response?.data?.detail ??
         "Failed to update user.",
+        "error",
       );
 
     } finally {
@@ -731,19 +747,21 @@ function Users() {
 
       setUser(updatedUser);
 
-      setMessage(
+      showToast(
         user.is_active
           ? "User deactivated successfully."
           : "User reactivated successfully.",
+        "success",
       );
 
     } catch (err: any) {
 
       console.error(err);
 
-      setError(
+      showToast(
         err.response?.data?.detail ??
         "Failed to update user status.",
+        "error",
       );
 
     } finally {
@@ -774,8 +792,9 @@ function Users() {
       createForm.employee_id <= 0
     ) {
 
-      setError(
+      showToast(
         "Employee ID must be a positive number.",
+        "warning",
       );
 
       return;
@@ -785,8 +804,9 @@ function Users() {
       !createForm.full_name.trim()
     ) {
 
-      setError(
+      showToast(
         "Full name is required.",
+        "warning",
       );
 
       return;
@@ -796,8 +816,9 @@ function Users() {
       !createForm.password.trim()
     ) {
 
-      setError(
+      showToast(
         "Password is required.",
+        "warning",
       );
 
       return;
@@ -805,8 +826,9 @@ function Users() {
 
     if (!createForm.role_id) {
 
-      setError(
+      showToast(
         "Please select a role.",
+        "warning",
       );
 
       return;
@@ -828,8 +850,9 @@ function Users() {
       !createForm.organization_unit_id
     ) {
 
-      setError(
+      showToast(
         "Please complete the organization assignment.",
+        "warning",
       );
 
       return;
@@ -839,12 +862,14 @@ function Users() {
 
       setLoading(true);
 
-      await createUser(
-        createForm,
-      );
+      await createUser({
+        ...createForm,
+        email: createForm.email?.trim() || null,
+      });
 
-      setMessage(
+      showToast(
         "User created successfully.",
+        "success",
       );
 
       resetOrganization();
@@ -863,9 +888,16 @@ function Users() {
 
       console.error(err);
 
-      setError(
+      const detail =
         err.response?.data?.detail ??
-        "Failed to create user.",
+        "Failed to create user.";
+
+      showToast(
+        detail,
+        typeof detail === "string" &&
+          detail.toLowerCase().includes("already exists")
+          ? "warning"
+          : "error",
       );
 
     } finally {
@@ -1454,152 +1486,144 @@ function Users() {
 
     return (
       <DashboardLayout>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+
         <div className="users-page">
 
-        <div className="users-hero">
+          <div className="users-hero">
 
-          <div className="users-hero-content">
+            <div className="users-hero-content">
 
-            <span className="users-eyebrow">
-              SFMS • ADMINISTRATION
-            </span>
+              <span className="users-eyebrow">
+                SFMS • ADMINISTRATION
+              </span>
 
-            <h1>
-              User Management
-            </h1>
+              <h1>
+                User Management
+              </h1>
 
-            <p>
-              Manage employee accounts,
-              roles and organizational
-              assignments.
-            </p>
+              <p>
+                Manage employee accounts,
+                roles and organizational
+                assignments.
+              </p>
 
-          </div>
+            </div>
 
-          <div className="users-hero-decoration">
+            <div className="users-hero-decoration">
 
-            <div className="hero-orbit orbit-one" />
-            <div className="hero-orbit orbit-two" />
+              <div className="hero-orbit orbit-one" />
+              <div className="hero-orbit orbit-two" />
 
-            <div className="hero-center">
-              U
+              <div className="hero-center">
+                U
+              </div>
+
             </div>
 
           </div>
 
-        </div>
 
+          <div className="management-intro">
 
-        {error && (
-          <div className="users-alert users-alert-error">
-            <span>!</span>
-            {error}
-          </div>
-        )}
+            <div>
+              <button
+                type="button"
+                className="dashboard-back-button"
+                onClick={backToDashboard}
+              >
+                <span>←</span>
+                Back to Dashboard
+              </button>
+            </div>
 
-
-        {message && (
-          <div className="users-alert users-alert-success">
-            <span>✓</span>
-            {message}
-          </div>
-        )}
-
-
-        <div className="management-intro">
-
-          <div>
-            <button
-          type="button"
-          className="dashboard-back-button"
-          onClick={backToDashboard}
-        >
-          <span>←</span>
-          Back to Dashboard
-        </button>
-          </div>
-
-          {/* <span>
+            {/* <span>
             ACCOUNT OPERATIONS
           </span> */}
 
-          <h2>
-            Manage Employees
-          </h2>
+            <h2>
+              Manage Employees
+            </h2>
 
-        </div>
+          </div>
 
 
-        <div className="management-cards">
+          <div className="management-cards">
 
-          <button
-            type="button"
-            className="management-card management-card-update"
-            onClick={
-              openUpdateUser
-            }
-          >
+            <button
+              type="button"
+              className="management-card management-card-update"
+              onClick={
+                openUpdateUser
+              }
+            >
 
-            <div className="management-icon">
-              ✎
-            </div>
+              <div className="management-icon">
+                ✎
+              </div>
 
-            <span className="management-card-label">
-              EXISTING ACCOUNT
-            </span>
+              <span className="management-card-label">
+                EXISTING ACCOUNT
+              </span>
 
-            <h3>
-              Update User
-            </h3>
+              <h3>
+                Update User
+              </h3>
 
-            {/* <p>
+              {/* <p>
               Find an employee and update
               their profile, role or
               organizational assignment.
             </p> */}
 
-            <div className="management-card-footer">
-              Update employee
-              <span>→</span>
-            </div>
+              <div className="management-card-footer">
+                Update employee
+                <span>→</span>
+              </div>
 
-          </button>
+            </button>
 
 
-          <button
-            type="button"
-            className="management-card management-card-create"
-            onClick={
-              openCreateUser
-            }
-          >
+            <button
+              type="button"
+              className="management-card management-card-create"
+              onClick={
+                openCreateUser
+              }
+            >
 
-            <div className="management-icon">
-              +
-            </div>
+              <div className="management-icon">
+                +
+              </div>
 
-            <span className="management-card-label">
-              NEW ACCOUNT
-            </span>
+              <span className="management-card-label">
+                NEW ACCOUNT
+              </span>
 
-            <h3>
-              Create User
-            </h3>
+              <h3>
+                Create User
+              </h3>
 
-            {/* <p>
+              {/* <p>
               Create a new employee account
               and assign their role and
               organization.
             </p> */}
 
-            <div className="management-card-footer">
-              Add employee
-              <span>→</span>
-            </div>
+              <div className="management-card-footer">
+                Add employee
+                <span>→</span>
+              </div>
 
-          </button>
+            </button>
 
-        </div>
+          </div>
 
         </div>
       </DashboardLayout>
@@ -1615,7 +1639,466 @@ function Users() {
 
     return (
       <DashboardLayout>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+
         <div className="users-page">
+
+          <div className="page-navigation">
+
+            <button
+              type="button"
+              className="dashboard-back-button"
+              onClick={backToDashboard}
+            >
+              <span>←</span>
+              Back to Dashboard
+            </button>
+
+            <button
+              type="button"
+              className="management-back-button"
+              onClick={goHome}
+            >
+              User Management
+            </button>
+
+          </div>
+
+
+          <div className="compact-page-header">
+
+            <div>
+
+              <span className="users-eyebrow">
+                SFMS • NEW ACCOUNT
+              </span>
+
+              <h1>
+                Create User
+              </h1>
+
+              <p>
+                Create an employee account
+                and assign the appropriate
+                access scope.
+              </p>
+
+            </div>
+
+            <div className="form-hero-badge">
+              +
+            </div>
+
+          </div>
+
+
+          <form
+            className="compact-user-form"
+            onSubmit={
+              handleCreateUser
+            }
+          >
+
+            {/* BASIC */}
+
+            <section className="compact-form-section">
+
+              <div className="compact-section-header">
+
+                <div className="compact-section-number">
+                  01
+                </div>
+
+                <div>
+                  <span>
+                    EMPLOYEE PROFILE
+                  </span>
+
+                  <h2>
+                    Basic Information
+                  </h2>
+                </div>
+
+              </div>
+
+
+              <div className="modern-form-grid">
+
+                <div className="modern-field">
+
+                  <label>
+                    Employee ID
+                    <span>*</span>
+                  </label>
+
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Employee ID"
+                    value={
+                      createForm.employee_id ||
+                      ""
+                    }
+                    onChange={(event) =>
+                      setCreateForm(
+                        (previous) => ({
+                          ...previous,
+                          employee_id:
+                            Number(
+                              event.target.value,
+                            ),
+                        }),
+                      )
+                    }
+                    required
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Full Name
+                    <span>*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="Full name"
+                    value={
+                      createForm.full_name
+                    }
+                    onChange={(event) =>
+                      setCreateForm(
+                        (previous) => ({
+                          ...previous,
+                          full_name:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    required
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Designation
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="Designation"
+                    value={
+                      createForm.designation ??
+                      ""
+                    }
+                    onChange={(event) =>
+                      setCreateForm(
+                        (previous) => ({
+                          ...previous,
+                          designation:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Email
+                  </label>
+
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={
+                      createForm.email ??
+                      ""
+                    }
+                    onChange={(event) =>
+                      setCreateForm(
+                        (previous) => ({
+                          ...previous,
+                          email:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Password
+                    <span>*</span>
+                  </label>
+
+                  <input
+                    type="password"
+                    placeholder="Create password"
+                    value={
+                      createForm.password
+                    }
+                    onChange={(event) =>
+                      setCreateForm(
+                        (previous) => ({
+                          ...previous,
+                          password:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    required
+                  />
+
+                </div>
+
+              </div>
+
+            </section>
+
+
+            {/* ROLE */}
+
+            <section className="compact-form-section">
+
+              <div className="compact-section-header">
+
+                <div className="compact-section-number">
+                  02
+                </div>
+
+                <div>
+                  <span>
+                    ACCESS CONTROL
+                  </span>
+
+                  <h2>
+                    Role & Rule
+                  </h2>
+                </div>
+
+              </div>
+
+
+              <div className="role-select-wrapper">
+
+                <label>
+                  Select Role
+                  <span>*</span>
+                </label>
+
+                <select
+                  className="large-role-select"
+                  value={
+                    createForm.role_id || ""
+                  }
+                  onChange={(event) =>
+                    handleCreateRoleChange(
+                      Number(
+                        event.target.value,
+                      ),
+                    )
+                  }
+                  required
+                >
+
+                  <option value="">
+                    Choose employee role
+                  </option>
+
+                  {roles.map(
+                    (role) => (
+                      <option
+                        key={role.id}
+                        value={role.id}
+                      >
+                        {role.name} —{" "}
+                        {role.description}
+                      </option>
+                    ),
+                  )}
+
+                </select>
+
+
+                {createForm.role_id > 0 && (
+
+                  <div className="selected-role-info">
+
+                    <span className="selected-role-check">
+                      ✓
+                    </span>
+
+                    <div>
+
+                      <strong>
+                        {
+                          getRole(
+                            createForm.role_id,
+                          )?.name
+                        }
+                      </strong>
+
+                      <p>
+                        {
+                          getRole(
+                            createForm.role_id,
+                          )?.description
+                        }
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                )}
+
+              </div>
+
+            </section>
+
+
+            {/* ORGANIZATION */}
+
+            <section className="compact-form-section">
+
+              <div className="compact-section-header">
+
+                <div className="compact-section-number">
+                  03
+                </div>
+
+                <div>
+                  <span>
+                    ORGANIZATION
+                  </span>
+
+                  <h2>
+                    Assignment
+                  </h2>
+                </div>
+
+              </div>
+
+
+              <div className="organization-panel">
+
+                {createForm.role_id === 0 ? (
+
+                  <div className="organization-empty">
+
+                    <strong>
+                      Select a role first
+                    </strong>
+
+                    <p>
+                      The required organization
+                      fields will appear here.
+                    </p>
+
+                  </div>
+
+                ) : organizationLoading ? (
+
+                  <div className="organization-loading-modern">
+
+                    <div className="loading-spinner" />
+
+                    Loading organization...
+
+                  </div>
+
+                ) : (
+
+                  <OrganizationSelector
+                    roleId={
+                      createForm.role_id
+                    }
+                    update={false}
+                  />
+
+                )}
+
+              </div>
+
+            </section>
+
+
+            {/* ACTIONS */}
+
+            <div className="modern-form-actions">
+
+              <button
+                type="button"
+                className="modern-secondary-button"
+                onClick={goHome}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="modern-primary-button"
+                disabled={loading}
+              >
+
+                {loading ? (
+                  <>
+                    <span className="button-spinner" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    ✓ Create User
+                  </>
+                )}
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+
+  // ==========================================================
+  // UPDATE PAGE
+  // ==========================================================
+
+  return (
+    <DashboardLayout>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      <div className="users-page">
 
         <div className="page-navigation">
 
@@ -1644,1027 +2127,239 @@ function Users() {
           <div>
 
             <span className="users-eyebrow">
-              SFMS • NEW ACCOUNT
+              SFMS • ACCOUNT MANAGEMENT
             </span>
 
             <h1>
-              Create User
+              Update User
             </h1>
 
             <p>
-              Create an employee account
-              and assign the appropriate
-              access scope.
+              Search an employee to update
+              their account.
             </p>
 
           </div>
 
-          <div className="form-hero-badge">
-            +
+          <div className="form-hero-badge update-badge">
+            ✎
           </div>
 
         </div>
 
 
-        {error && (
-          <div className="users-alert users-alert-error">
-            <span>!</span>
-            {error}
-          </div>
-        )}
+        {/* SEARCH */}
 
+        <section className="search-user-panel">
 
-        {message && (
-          <div className="users-alert users-alert-success">
-            <span>✓</span>
-            {message}
-          </div>
-        )}
+          <div className="search-user-heading">
 
-
-        <form
-          className="compact-user-form"
-          onSubmit={
-            handleCreateUser
-          }
-        >
-
-          {/* BASIC */}
-
-          <section className="compact-form-section">
-
-            <div className="compact-section-header">
-
-              <div className="compact-section-number">
-                01
-              </div>
-
-              <div>
-                <span>
-                  EMPLOYEE PROFILE
-                </span>
-
-                <h2>
-                  Basic Information
-                </h2>
-              </div>
-
-            </div>
-
-
-            <div className="modern-form-grid">
-
-              <div className="modern-field">
-
-                <label>
-                  Employee ID
-                  <span>*</span>
-                </label>
-
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Employee ID"
-                  value={
-                    createForm.employee_id ||
-                    ""
-                  }
-                  onChange={(event) =>
-                    setCreateForm(
-                      (previous) => ({
-                        ...previous,
-                        employee_id:
-                          Number(
-                            event.target.value,
-                          ),
-                      }),
-                    )
-                  }
-                  required
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Full Name
-                  <span>*</span>
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Full name"
-                  value={
-                    createForm.full_name
-                  }
-                  onChange={(event) =>
-                    setCreateForm(
-                      (previous) => ({
-                        ...previous,
-                        full_name:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  required
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Designation
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Designation"
-                  value={
-                    createForm.designation ??
-                    ""
-                  }
-                  onChange={(event) =>
-                    setCreateForm(
-                      (previous) => ({
-                        ...previous,
-                        designation:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Email
-                </label>
-
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={
-                    createForm.email ??
-                    ""
-                  }
-                  onChange={(event) =>
-                    setCreateForm(
-                      (previous) => ({
-                        ...previous,
-                        email:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Password
-                  <span>*</span>
-                </label>
-
-                <input
-                  type="password"
-                  placeholder="Create password"
-                  value={
-                    createForm.password
-                  }
-                  onChange={(event) =>
-                    setCreateForm(
-                      (previous) => ({
-                        ...previous,
-                        password:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  required
-                />
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          {/* ROLE */}
-
-          <section className="compact-form-section">
-
-            <div className="compact-section-header">
-
-              <div className="compact-section-number">
-                02
-              </div>
-
-              <div>
-                <span>
-                  ACCESS CONTROL
-                </span>
-
-                <h2>
-                  Role & Rule
-                </h2>
-              </div>
-
-            </div>
-
-
-            <div className="role-select-wrapper">
-
-              <label>
-                Select Role
-                <span>*</span>
-              </label>
-
-              <select
-                className="large-role-select"
-                value={
-                  createForm.role_id || ""
-                }
-                onChange={(event) =>
-                  handleCreateRoleChange(
-                    Number(
-                      event.target.value,
-                    ),
-                  )
-                }
-                required
-              >
-
-                <option value="">
-                  Choose employee role
-                </option>
-
-                {roles.map(
-                  (role) => (
-                    <option
-                      key={role.id}
-                      value={role.id}
-                    >
-                      {role.name} —{" "}
-                      {role.description}
-                    </option>
-                  ),
-                )}
-
-              </select>
-
-
-              {createForm.role_id > 0 && (
-
-                <div className="selected-role-info">
-
-                  <span className="selected-role-check">
-                    ✓
-                  </span>
-
-                  <div>
-
-                    <strong>
-                      {
-                        getRole(
-                          createForm.role_id,
-                        )?.name
-                      }
-                    </strong>
-
-                    <p>
-                      {
-                        getRole(
-                          createForm.role_id,
-                        )?.description
-                      }
-                    </p>
-
-                  </div>
-
-                </div>
-
-              )}
-
-            </div>
-
-          </section>
-
-
-          {/* ORGANIZATION */}
-
-          <section className="compact-form-section">
-
-            <div className="compact-section-header">
-
-              <div className="compact-section-number">
-                03
-              </div>
-
-              <div>
-                <span>
-                  ORGANIZATION
-                </span>
-
-                <h2>
-                  Assignment
-                </h2>
-              </div>
-
-            </div>
-
-
-            <div className="organization-panel">
-
-              {createForm.role_id === 0 ? (
-
-                <div className="organization-empty">
-
-                  <strong>
-                    Select a role first
-                  </strong>
-
-                  <p>
-                    The required organization
-                    fields will appear here.
-                  </p>
-
-                </div>
-
-              ) : organizationLoading ? (
-
-                <div className="organization-loading-modern">
-
-                  <div className="loading-spinner" />
-
-                  Loading organization...
-
-                </div>
-
-              ) : (
-
-                <OrganizationSelector
-                  roleId={
-                    createForm.role_id
-                  }
-                  update={false}
-                />
-
-              )}
-
-            </div>
-
-          </section>
-
-
-          {/* ACTIONS */}
-
-          <div className="modern-form-actions">
-
-            <button
-              type="button"
-              className="modern-secondary-button"
-              onClick={goHome}
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              className="modern-primary-button"
-              disabled={loading}
-            >
-
-              {loading ? (
-                <>
-                  <span className="button-spinner" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  ✓ Create User
-                </>
-              )}
-
-            </button>
-
-          </div>
-
-        </form>
-
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-
-  // ==========================================================
-  // UPDATE PAGE
-  // ==========================================================
-
-  return (
-    <DashboardLayout>
-      <div className="users-page">
-
-      <div className="page-navigation">
-
-        <button
-          type="button"
-          className="dashboard-back-button"
-          onClick={backToDashboard}
-        >
-          <span>←</span>
-          Back to Dashboard
-        </button>
-
-        <button
-          type="button"
-          className="management-back-button"
-          onClick={goHome}
-        >
-          User Management
-        </button>
-
-      </div>
-
-
-      <div className="compact-page-header">
-
-        <div>
-
-          <span className="users-eyebrow">
-            SFMS • ACCOUNT MANAGEMENT
-          </span>
-
-          <h1>
-            Update User
-          </h1>
-
-          <p>
-            Search an employee to update
-            their account.
-          </p>
-
-        </div>
-
-        <div className="form-hero-badge update-badge">
-          ✎
-        </div>
-
-      </div>
-
-
-      {error && (
-        <div className="users-alert users-alert-error">
-          <span>!</span>
-          {error}
-        </div>
-      )}
-
-
-      {message && (
-        <div className="users-alert users-alert-success">
-          <span>✓</span>
-          {message}
-        </div>
-      )}
-
-
-      {/* SEARCH */}
-
-      <section className="search-user-panel">
-
-        <div className="search-user-heading">
-
-          <div className="search-user-icon">
-            ⌕
-          </div>
-
-          <div>
-
-            <span>
-              FIND EMPLOYEE
-            </span>
-
-            <h2>
-              Search User
-            </h2>
-
-          </div>
-
-        </div>
-
-
-        <form
-          className="modern-search-form"
-          onSubmit={
-            handleSearch
-          }
-        >
-
-          <div className="modern-search-input">
-
-            <span>
-              #
-            </span>
-
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="Employee ID"
-              value={employeeId}
-              onChange={(event) =>
-                setEmployeeId(
-                  event.target.value,
-                )
-              }
-            />
-
-          </div>
-
-          <button
-            type="submit"
-            className="modern-search-button"
-            disabled={loading}
-          >
-
-            {loading ? (
-              <>
-                <span className="button-spinner" />
-                Searching...
-              </>
-            ) : (
-              <>
-                Search
-                <span>→</span>
-              </>
-            )}
-
-          </button>
-
-        </form>
-
-      </section>
-
-
-      {/* USER PROFILE */}
-
-      {user && !editing && (
-
-        <section className="modern-user-profile">
-
-          <div className="profile-top">
-
-            <div className="profile-identity">
-
-              <div className="profile-avatar">
-                {user.full_name
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-
-              <div>
-
-                <span className="profile-status">
-
-                  <span
-                    className={
-                      user.is_active
-                        ? "status-dot status-dot-active"
-                        : "status-dot"
-                    }
-                  />
-
-                  {user.is_active
-                    ? "ACTIVE"
-                    : "INACTIVE"}
-
-                </span>
-
-                <h2>
-                  {user.full_name}
-                </h2>
-
-                <p>
-                  {user.designation ??
-                    "Employee"}
-                </p>
-
-              </div>
-
-            </div>
-
-
-            <div className="profile-actions">
-
-              <button
-                type="button"
-                className="profile-edit-button"
-                onClick={
-                  startEditing
-                }
-              >
-                ✎ Edit
-              </button>
-
-              <button
-                type="button"
-                className={
-                  user.is_active
-                    ? "profile-danger-button"
-                    : "profile-success-button"
-                }
-                onClick={
-                  handleStatusChange
-                }
-              >
-                {user.is_active
-                  ? "Deactivate"
-                  : "Reactivate"}
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div className="profile-divider" />
-
-
-          <div className="profile-grid">
-
-            <div className="profile-item">
-              <span>
-                EMPLOYEE ID
-              </span>
-
-              <strong>
-                {user.employee_id}
-              </strong>
-            </div>
-
-            <div className="profile-item">
-              <span>
-                USERNAME
-              </span>
-
-              <strong>
-                {user.username}
-              </strong>
-            </div>
-
-            <div className="profile-item">
-              <span>
-                EMAIL
-              </span>
-
-              <strong>
-                {user.email ?? "—"}
-              </strong>
-            </div>
-
-            <div className="profile-item">
-              <span>
-                ROLE
-              </span>
-
-              <strong>
-                {getRoleName(
-                  user.role_id,
-                )}
-              </strong>
-            </div>
-
-          </div>
-
-
-          <div className="profile-organization">
-
-            <div className="profile-organization-icon">
-              ◈
+            <div className="search-user-icon">
+              ⌕
             </div>
 
             <div>
 
               <span>
-                ORGANIZATION
+                FIND EMPLOYEE
               </span>
 
-              <strong>
-
-                {getOrganization(
-                  organizationUnits,
-                  user.organization_unit_id,
-                )
-                  ? `${getOrganization(
-                      organizationUnits,
-                      user.organization_unit_id,
-                    )?.name} — ${
-                      getOrganization(
-                        organizationUnits,
-                        user.organization_unit_id,
-                      )?.code
-                    }`
-                  : "System-wide"}
-
-              </strong>
+              <h2>
+                Search User
+              </h2>
 
             </div>
 
           </div>
 
-        </section>
-      )}
 
+          <form
+            className="modern-search-form"
+            onSubmit={
+              handleSearch
+            }
+          >
 
-      {/* EDIT */}
+            <div className="modern-search-input">
 
-      {user && editing && (
+              <span>
+                #
+              </span>
 
-        <form
-          className="compact-user-form"
-          onSubmit={
-            handleUpdate
-          }
-        >
-
-          <section className="compact-form-section">
-
-            <div className="compact-section-header">
-
-              <div className="compact-section-number">
-                01
-              </div>
-
-              <div>
-
-                <span>
-                  EMPLOYEE PROFILE
-                </span>
-
-                <h2>
-                  Account Information
-                </h2>
-
-              </div>
-
-            </div>
-
-
-            <div className="modern-form-grid">
-
-              <div className="modern-field">
-
-                <label>
-                  Employee ID
-                </label>
-
-                <input
-                  value={
-                    user.employee_id
-                  }
-                  disabled
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Username
-                </label>
-
-                <input
-                  value={
-                    user.username
-                  }
-                  disabled
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Full Name
-                  <span>*</span>
-                </label>
-
-                <input
-                  value={
-                    form.full_name ?? ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (previous) => ({
-                        ...previous,
-                        full_name:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  required
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Designation
-                </label>
-
-                <input
-                  value={
-                    form.designation ?? ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (previous) => ({
-                        ...previous,
-                        designation:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  Email
-                </label>
-
-                <input
-                  type="email"
-                  value={
-                    form.email ?? ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (previous) => ({
-                        ...previous,
-                        email:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-
-              </div>
-
-
-              <div className="modern-field">
-
-                <label>
-                  New Password
-                </label>
-
-                <input
-                  type="password"
-                  placeholder="Leave blank to keep current"
-                  onChange={(event) =>
-                    setForm(
-                      (previous) => ({
-                        ...previous,
-                        password:
-                          event.target.value ||
-                          null,
-                      }),
-                    )
-                  }
-                />
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          <section className="compact-form-section">
-
-            <div className="compact-section-header">
-
-              <div className="compact-section-number">
-                02
-              </div>
-
-              <div>
-
-                <span>
-                  ACCESS CONTROL
-                </span>
-
-                <h2>
-                  Role & Rule
-                </h2>
-
-              </div>
-
-            </div>
-
-
-            <div className="role-select-wrapper">
-
-              <label>
-                Select Role
-                <span>*</span>
-              </label>
-
-              <select
-                className="large-role-select"
-                value={
-                  form.role_id ?? ""
-                }
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="Employee ID"
+                value={employeeId}
                 onChange={(event) =>
-                  handleUpdateRoleChange(
-                    Number(
-                      event.target.value,
-                    ),
+                  setEmployeeId(
+                    event.target.value,
                   )
                 }
-                required
-              >
+              />
 
-                <option value="">
-                  Choose employee role
-                </option>
+            </div>
 
-                {roles.map(
-                  (role) => (
-                    <option
-                      key={role.id}
-                      value={role.id}
-                    >
-                      {role.name} —{" "}
-                      {role.description}
-                    </option>
-                  ),
-                )}
+            <button
+              type="submit"
+              className="modern-search-button"
+              disabled={loading}
+            >
 
-              </select>
+              {loading ? (
+                <>
+                  <span className="button-spinner" />
+                  Searching...
+                </>
+              ) : (
+                <>
+                  Search
+                  <span>→</span>
+                </>
+              )}
+
+            </button>
+
+          </form>
+
+        </section>
 
 
-              {form.role_id && (
+        {/* USER PROFILE */}
 
-                <div className="selected-role-info">
+        {user && !editing && (
 
-                  <span className="selected-role-check">
-                    ✓
+          <section className="modern-user-profile">
+
+            <div className="profile-top">
+
+              <div className="profile-identity">
+
+                <div className="profile-avatar">
+                  {user.full_name
+                    .charAt(0)
+                    .toUpperCase()}
+                </div>
+
+                <div>
+
+                  <span className="profile-status">
+
+                    <span
+                      className={
+                        user.is_active
+                          ? "status-dot status-dot-active"
+                          : "status-dot"
+                      }
+                    />
+
+                    {user.is_active
+                      ? "ACTIVE"
+                      : "INACTIVE"}
+
                   </span>
 
-                  <div>
+                  <h2>
+                    {user.full_name}
+                  </h2>
 
-                    <strong>
-                      {
-                        getRole(
-                          form.role_id,
-                        )?.name
-                      }
-                    </strong>
-
-                    <p>
-                      {
-                        getRole(
-                          form.role_id,
-                        )?.description
-                      }
-                    </p>
-
-                  </div>
+                  <p>
+                    {user.designation ??
+                      "Employee"}
+                  </p>
 
                 </div>
 
-              )}
+              </div>
+
+
+              <div className="profile-actions">
+
+                <button
+                  type="button"
+                  className="profile-edit-button"
+                  onClick={
+                    startEditing
+                  }
+                >
+                  ✎ Edit
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    user.is_active
+                      ? "profile-danger-button"
+                      : "profile-success-button"
+                  }
+                  onClick={
+                    handleStatusChange
+                  }
+                >
+                  {user.is_active
+                    ? "Deactivate"
+                    : "Reactivate"}
+                </button>
+
+              </div>
 
             </div>
 
-          </section>
+
+            <div className="profile-divider" />
 
 
-          <section className="compact-form-section">
+            <div className="profile-grid">
 
-            <div className="compact-section-header">
+              <div className="profile-item">
+                <span>
+                  EMPLOYEE ID
+                </span>
 
-              <div className="compact-section-number">
-                03
+                <strong>
+                  {user.employee_id}
+                </strong>
+              </div>
+
+              <div className="profile-item">
+                <span>
+                  USERNAME
+                </span>
+
+                <strong>
+                  {user.username}
+                </strong>
+              </div>
+
+              <div className="profile-item">
+                <span>
+                  EMAIL
+                </span>
+
+                <strong>
+                  {user.email ?? "—"}
+                </strong>
+              </div>
+
+              <div className="profile-item">
+                <span>
+                  ROLE
+                </span>
+
+                <strong>
+                  {getRoleName(
+                    user.role_id,
+                  )}
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div className="profile-organization">
+
+              <div className="profile-organization-icon">
+                ◈
               </div>
 
               <div>
@@ -2673,78 +2368,390 @@ function Users() {
                   ORGANIZATION
                 </span>
 
-                <h2>
-                  Assignment
-                </h2>
+                <strong>
+
+                  {getOrganization(
+                    organizationUnits,
+                    user.organization_unit_id,
+                  )
+                    ? `${getOrganization(
+                      organizationUnits,
+                      user.organization_unit_id,
+                    )?.name} — ${getOrganization(
+                      organizationUnits,
+                      user.organization_unit_id,
+                    )?.code
+                    }`
+                    : "System-wide"}
+
+                </strong>
 
               </div>
 
             </div>
 
+          </section>
+        )}
 
-            <div className="organization-panel">
 
-              {organizationLoading ? (
+        {/* EDIT */}
 
-                <div className="organization-loading-modern">
+        {user && editing && (
 
-                  <div className="loading-spinner" />
+          <form
+            className="compact-user-form"
+            onSubmit={
+              handleUpdate
+            }
+          >
 
-                  Loading organization...
+            <section className="compact-form-section">
+
+              <div className="compact-section-header">
+
+                <div className="compact-section-number">
+                  01
+                </div>
+
+                <div>
+
+                  <span>
+                    EMPLOYEE PROFILE
+                  </span>
+
+                  <h2>
+                    Account Information
+                  </h2>
 
                 </div>
 
-              ) : (
+              </div>
 
-                <OrganizationSelector
-                  roleId={
-                    form.role_id ?? 0
+
+              <div className="modern-form-grid">
+
+                <div className="modern-field">
+
+                  <label>
+                    Employee ID
+                  </label>
+
+                  <input
+                    value={
+                      user.employee_id
+                    }
+                    disabled
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Username
+                  </label>
+
+                  <input
+                    value={
+                      user.username
+                    }
+                    disabled
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Full Name
+                    <span>*</span>
+                  </label>
+
+                  <input
+                    value={
+                      form.full_name ?? ""
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (previous) => ({
+                          ...previous,
+                          full_name:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    required
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Designation
+                  </label>
+
+                  <input
+                    value={
+                      form.designation ?? ""
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (previous) => ({
+                          ...previous,
+                          designation:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    Email
+                  </label>
+
+                  <input
+                    type="email"
+                    value={
+                      form.email ?? ""
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (previous) => ({
+                          ...previous,
+                          email:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+
+                </div>
+
+
+                <div className="modern-field">
+
+                  <label>
+                    New Password
+                  </label>
+
+                  <input
+                    type="password"
+                    placeholder="Leave blank to keep current"
+                    onChange={(event) =>
+                      setForm(
+                        (previous) => ({
+                          ...previous,
+                          password:
+                            event.target.value ||
+                            null,
+                        }),
+                      )
+                    }
+                  />
+
+                </div>
+
+              </div>
+
+            </section>
+
+
+            <section className="compact-form-section">
+
+              <div className="compact-section-header">
+
+                <div className="compact-section-number">
+                  02
+                </div>
+
+                <div>
+
+                  <span>
+                    ACCESS CONTROL
+                  </span>
+
+                  <h2>
+                    Role & Rule
+                  </h2>
+
+                </div>
+
+              </div>
+
+
+              <div className="role-select-wrapper">
+
+                <label>
+                  Select Role
+                  <span>*</span>
+                </label>
+
+                <select
+                  className="large-role-select"
+                  value={
+                    form.role_id ?? ""
                   }
-                  update={true}
-                />
+                  onChange={(event) =>
+                    handleUpdateRoleChange(
+                      Number(
+                        event.target.value,
+                      ),
+                    )
+                  }
+                  required
+                >
 
-              )}
+                  <option value="">
+                    Choose employee role
+                  </option>
+
+                  {roles.map(
+                    (role) => (
+                      <option
+                        key={role.id}
+                        value={role.id}
+                      >
+                        {role.name} —{" "}
+                        {role.description}
+                      </option>
+                    ),
+                  )}
+
+                </select>
+
+
+                {form.role_id && (
+
+                  <div className="selected-role-info">
+
+                    <span className="selected-role-check">
+                      ✓
+                    </span>
+
+                    <div>
+
+                      <strong>
+                        {
+                          getRole(
+                            form.role_id,
+                          )?.name
+                        }
+                      </strong>
+
+                      <p>
+                        {
+                          getRole(
+                            form.role_id,
+                          )?.description
+                        }
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                )}
+
+              </div>
+
+            </section>
+
+
+            <section className="compact-form-section">
+
+              <div className="compact-section-header">
+
+                <div className="compact-section-number">
+                  03
+                </div>
+
+                <div>
+
+                  <span>
+                    ORGANIZATION
+                  </span>
+
+                  <h2>
+                    Assignment
+                  </h2>
+
+                </div>
+
+              </div>
+
+
+              <div className="organization-panel">
+
+                {organizationLoading ? (
+
+                  <div className="organization-loading-modern">
+
+                    <div className="loading-spinner" />
+
+                    Loading organization...
+
+                  </div>
+
+                ) : (
+
+                  <OrganizationSelector
+                    roleId={
+                      form.role_id ?? 0
+                    }
+                    update={true}
+                  />
+
+                )}
+
+              </div>
+
+            </section>
+
+
+            <div className="modern-form-actions">
+
+              <button
+                type="button"
+                className="modern-secondary-button"
+                onClick={
+                  cancelEditing
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="modern-primary-button"
+                disabled={loading}
+              >
+
+                {loading ? (
+                  <>
+                    <span className="button-spinner" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    ✓ Save Changes
+                  </>
+                )}
+
+              </button>
 
             </div>
 
-          </section>
-
-
-          <div className="modern-form-actions">
-
-            <button
-              type="button"
-              className="modern-secondary-button"
-              onClick={
-                cancelEditing
-              }
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              className="modern-primary-button"
-              disabled={loading}
-            >
-
-              {loading ? (
-                <>
-                  <span className="button-spinner" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  ✓ Save Changes
-                </>
-              )}
-
-            </button>
-
-          </div>
-
-        </form>
-      )}
+          </form>
+        )}
 
       </div>
     </DashboardLayout>
