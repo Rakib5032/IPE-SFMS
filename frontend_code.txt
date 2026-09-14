@@ -3,7 +3,7 @@ SFMS FRONTEND SOURCE CODE
 ====================================================================================================
 
 Frontend directory: D:\My projects\IPE Project\web
-Total files: 53
+Total files: 59
 
 
 ====================================================================================================
@@ -4722,8 +4722,10 @@ function Sidebar({
   /*
    * ADMIN role ID
    *
-   * Organizations and Users are restricted
-   * to Administrator.
+   * Users are restricted to Administrator.
+   * Organizations are controlled by VIEW_ORGANIZATIONS
+   * permission and therefore can be visible to other
+   * authorized roles.
    */
   const isAdmin = roleId === 1;
 
@@ -4778,16 +4780,11 @@ function Sidebar({
         /*
          * Organizations
          *
-         * ADMIN only
+         * Controlled by VIEW_ORGANIZATIONS
+         * permission.
          */
-        if (
-          item.label ===
-          "Organizations"
-        ) {
-          return (
-            isAdmin &&
-            canView(item.permission)
-          );
+        if (item.label === "Organizations") {
+          return canView(item.permission);
         }
 
 
@@ -4959,6 +4956,7 @@ function Sidebar({
               )}
 
             </div>
+
           )}
 
 
@@ -4989,8 +4987,7 @@ function Sidebar({
                       {item.label === "Users" &&
                         "♙"}
 
-                      {item.label ===
-                        "Organizations" &&
+                      {item.label === "Organizations" &&
                         "▥"}
 
                     </span>
@@ -5005,6 +5002,7 @@ function Sidebar({
               )}
 
             </div>
+
           )}
 
 
@@ -5044,6 +5042,7 @@ function Sidebar({
               )}
 
             </div>
+
           )}
 
         </nav>
@@ -5142,6 +5141,17 @@ FILE 18: frontend/src\config\permissions.ts
 //
 // The frontend uses role_id for UI access control.
 // The backend remains the final authority for security.
+//
+// IMPORTANT
+// ------------------------------------------------------------
+// This file defines BASE ROLE permissions.
+//
+// Organization editing is NOT automatically granted to
+// DGM, CENTRAL_MANAGER, or GROUP_MANAGER.
+//
+// An Administrator may later grant organization-edit access
+// to an individual eligible manager through user-specific
+// permission overrides.
 // ============================================================
 
 
@@ -5215,47 +5225,46 @@ const roleCodes: Record<number, RoleCode> = {
 
 
 // ============================================================
-// ROLE → PERMISSIONS
+// ROLE → BASE PERMISSIONS
 // ============================================================
 //
-// Current SFMS frontend requirement:
+// ORGANIZATION ACCESS
 //
 // ADMIN
-//     Full access
+//     View all organizations.
+//     Manage organizations.
 //
 // DGM
-//     Management + operational access
-//     No Users
+//     View organizations.
+//     Organization editing is NOT granted by default.
 //
 // CENTRAL_MANAGER
-//     Management + operational access
-//     View Organizations
-//     No Users
+//     View organizations.
+//     Organization editing is NOT granted by default.
 //
 // GROUP_MANAGER
-//     Group-level operational access + reports
-//     No Users
+//     View assigned group and its units.
+//     Organization editing is NOT granted by default.
 //
 // FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // DPM
-//     Same permission level as FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // APM
-//     Same permission level as FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // IN_CHARGE
-//     Same permission level as FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // SUPERVISOR
-//     Line-level operational access
-//     No Users
-//     No Organizations
-//     No Reports
+//     No Organization page.
+//     Works through assigned line(s) only.
 //
 // ============================================================
 
@@ -5309,12 +5318,10 @@ const rolePermissions: Record<
     "VIEW_DASHBOARD",
 
     // Users
-    // "VIEW_USERS",
-    // "MANAGE_USERS",
+    // No user management access.
 
     // Organizations
-    // "VIEW_ORGANIZATIONS",
-    // "MANAGE_ORGANIZATIONS",
+    "VIEW_ORGANIZATIONS",
 
     // Lines
     "VIEW_LINES",
@@ -5346,8 +5353,7 @@ const rolePermissions: Record<
     "VIEW_DASHBOARD",
 
     // Users
-    // "VIEW_USERS",
-    // "MANAGE_USERS",
+    // No user management access.
 
     // Organizations
     "VIEW_ORGANIZATIONS",
@@ -5382,11 +5388,11 @@ const rolePermissions: Record<
     "VIEW_DASHBOARD",
 
     // Users
-    // "VIEW_USERS",
-    // "MANAGE_USERS",
+    // No user management access.
 
     // Organizations
-    // Organization management is not allowed here.
+    // View assigned group only.
+    "VIEW_ORGANIZATIONS",
 
     // Lines
     "VIEW_LINES",
@@ -5416,6 +5422,9 @@ const rolePermissions: Record<
   FLOOR_IE: [
     "VIEW_DASHBOARD",
 
+    // No Organization page.
+    // Access assigned unit through Lines.
+
     // Lines
     "VIEW_LINES",
     "ASSIGN_LINES",
@@ -5443,6 +5452,9 @@ const rolePermissions: Record<
 
   DPM: [
     "VIEW_DASHBOARD",
+
+    // No Organization page.
+    // Access assigned unit through Lines.
 
     // Lines
     "VIEW_LINES",
@@ -5472,9 +5484,8 @@ const rolePermissions: Record<
   APM: [
     "VIEW_DASHBOARD",
 
-    // Lines
-    "VIEW_LINES",
-    "ASSIGN_LINES",
+    // No Organization page.
+    // Access assigned unit through Lines.
 
     // Layout
     "VIEW_LAYOUT",
@@ -5488,6 +5499,10 @@ const rolePermissions: Record<
     "VIEW_LINE_STATUS",
     "MANAGE_LINE_STATUS",
 
+    // Lines
+    "VIEW_LINES",
+    "ASSIGN_LINES",
+
     // Reports
     "VIEW_REPORTS",
   ],
@@ -5499,6 +5514,9 @@ const rolePermissions: Record<
 
   IN_CHARGE: [
     "VIEW_DASHBOARD",
+
+    // No Organization page.
+    // Access assigned unit through Lines.
 
     // Lines
     "VIEW_LINES",
@@ -5528,6 +5546,9 @@ const rolePermissions: Record<
   SUPERVISOR: [
     "VIEW_DASHBOARD",
 
+    // No Organization page.
+    // Only assigned line(s) are accessible.
+
     // Lines
     "VIEW_LINES",
 
@@ -5543,7 +5564,7 @@ const rolePermissions: Record<
     "VIEW_LINE_STATUS",
     "MANAGE_LINE_STATUS",
 
-    // Reports intentionally excluded
+    // Reports intentionally excluded.
   ],
 };
 
@@ -8510,34 +8531,617 @@ createRoot(document.getElementById('root')!).render(
 
 
 ====================================================================================================
-FILE 24: frontend/src\pages\auth\Login.tsx
+FILE 24: frontend/src\pages\auth\Login.css
 ====================================================================================================
 
-import { useState } from "react";
-import type { FormEvent } from "react";
+.login-page {
+  position: relative;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* =========================
+   LOGIN CARD
+   ========================= */
+
+.login-card {
+  background: #ffffff;
+
+  padding:
+    36px
+    40px
+    28px;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 15px 35px
+    rgba(0, 0, 0, 0.2);
+
+  width: 100%;
+  max-width: 420px;
+
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* =========================
+   BRANDING
+   ========================= */
+
+.branding-header {
+  text-align: center;
+
+  margin-bottom: 18px;
+
+  border-bottom:
+    1px solid #e2e8f0;
+
+  padding-bottom: 12px;
+}
+
+.company-badge {
+  font-size: 1.05rem;
+  font-weight: 900;
+
+  color: #2d3748;
+
+  letter-spacing: 1.2px;
+}
+
+.dept-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+
+  color: #667eea;
+
+  letter-spacing: 1px;
+
+  margin-top: 2px;
+}
+
+/* =========================
+   MASCOT
+   ========================= */
+
+.mascot-container {
+  display: flex;
+  justify-content: center;
+
+  margin-bottom: 15px;
+}
+
+.mascot {
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #ffbe0b;
+
+  transition:
+    all 0.3s ease;
+}
+
+.mascot-success {
+  background: #06d6a0;
+}
+
+.mascot-shock {
+  background: #ff0054;
+}
+
+.mascot-eyes {
+  display: flex;
+
+  gap: 16px;
+
+  position: absolute;
+
+  top: 28px;
+}
+
+.mascot-eye {
+  width: 12px;
+  height: 12px;
+
+  background: #222222;
+
+  border-radius: 50%;
+
+  transition:
+    transform 0.1s ease-out,
+    height 0.2s ease;
+}
+
+.mascot-mouth {
+  width: 20px;
+  height: 10px;
+
+  border-bottom:
+    3px solid #222222;
+
+  border-radius:
+    0 0 10px 10px;
+
+  position: absolute;
+
+  bottom: 18px;
+
+  transition:
+    all 0.2s ease;
+}
+
+.mouth-shock {
+  height: 14px;
+  width: 14px;
+
+  border-radius: 50%;
+
+  background: #222222;
+
+  border-bottom: none;
+}
+
+/* =========================
+   TITLE
+   ========================= */
+
+.login-title {
+  margin:
+    10px
+    0
+    5px;
+
+  color: #333333;
+
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.login-subtitle {
+  color: #666666;
+
+  font-size: 0.88rem;
+
+  margin-bottom: 25px;
+}
+
+/* =========================
+   FORM
+   ========================= */
+
+.login-form {
+  width: 100%;
+}
+
+.form-group {
+  text-align: left;
+
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  color: #444444;
+
+  margin-bottom: 6px;
+}
+
+.input-wrapper {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+
+  padding:
+    12px
+    16px;
+
+  border:
+    2px solid #e2e8f0;
+
+  border-radius: 10px;
+
+  outline: none;
+
+  font-size: 0.95rem;
+
+  box-sizing: border-box;
+
+  color: #333333;
+
+  background: #ffffff;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.12);
+}
+
+.form-input:disabled {
+  background: #f8fafc;
+  cursor: not-allowed;
+}
+
+/* =========================
+   PASSWORD TOGGLE
+   ========================= */
+
+.toggle-btn {
+  position: absolute;
+
+  right: 10px;
+
+  background: none;
+
+  border: none;
+
+  cursor: pointer;
+
+  font-size: 0.8rem;
+
+  color: #666666;
+}
+
+.toggle-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* =========================
+   SUBMIT BUTTON
+   ========================= */
+
+.submit-btn {
+  width: 100%;
+
+  padding: 14px;
+
+  background: #667eea;
+
+  color: #ffffff;
+
+  border: none;
+
+  border-radius: 10px;
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #5a6fd6;
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.footer-branding {
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-top: 20px;
+
+  padding-top: 12px;
+
+  border-top:
+    1px dashed #cbd5e1;
+
+  font-size: 0.62rem;
+
+  color: #94a3b8;
+
+  font-weight: 700;
+}
+
+/* =========================
+   LOGIN ERROR TOAST
+   ========================= */
+
+.login-toast {
+  position: fixed;
+
+  top: 25px;
+  right: 25px;
+
+  z-index: 99999;
+
+  width: 330px;
+  min-height: 75px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  padding:
+    14px
+    18px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-left:
+    5px solid #dc2626;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 8px 25px
+    rgba(0, 0, 0, 0.18);
+}
+
+.toast-emoji {
+  flex-shrink: 0;
+
+  font-size: 2rem;
+
+  line-height: 1;
+}
+
+.toast-content {
+  min-width: 0;
+
+  text-align: left;
+}
+
+.toast-title {
+  margin-bottom: 3px;
+
+  color: #dc2626;
+
+  font-size: 0.9rem;
+
+  font-weight: 800;
+}
+
+.toast-message {
+  color: #4a5568;
+
+  font-size: 0.8rem;
+
+  font-weight: 600;
+
+  line-height: 1.4;
+
+  word-break: break-word;
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 480px) {
+  .login-card {
+    padding:
+      30px
+      24px
+      24px;
+  }
+
+  .login-toast {
+    top: 15px;
+    right: 15px;
+    left: 15px;
+
+    width: auto;
+  }
+}
+
+
+====================================================================================================
+FILE 25: frontend/src\pages\auth\Login.tsx
+====================================================================================================
+
+import React, { useEffect, useRef, useState } from "react";
 import { login } from "../../services/authService";
 import { setTokens } from "../../utils/storage";
 
-function Login() {
+import "./Login.css";
+
+type MascotState =
+  | "idle"
+  | "watching"
+  | "peeking"
+  | "success";
+
+export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
+  const [mascotState, setMascotState] =
+    useState<MascotState>("idle");
 
-    setError("");
+  const [eyePos, setEyePos] = useState({
+    x: 0,
+    y: 0,
+  });
 
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  const errorTimerRef =
+    useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /*
+   * Track mouse position over Employee ID input
+   * so the mascot eyes follow the cursor.
+   */
+  const trackMouse = (
+    e: React.MouseEvent<HTMLInputElement>
+  ) => {
+    const rect =
+      e.currentTarget.getBoundingClientRect();
+
+    const x = Math.min(
+      Math.max(
+        (e.clientX - rect.left) / 10,
+        -6
+      ),
+      6
+    );
+
+    const y = Math.min(
+      Math.max(
+        (e.clientY - rect.top) / 10,
+        -4
+      ),
+      4
+    );
+
+    setEyePos({
+      x,
+      y,
+    });
+  };
+
+  /*
+   * Show login error.
+   *
+   * The warning stays visible for exactly 4 seconds.
+   * If another error occurs before that, the previous
+   * timer is cancelled and a new 4-second timer starts.
+   */
+  const showError = (message: string) => {
+    /*
+     * Clear the previous timer first.
+     */
+    if (errorTimerRef.current !== null) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+
+    /*
+     * Show warning.
+     */
+    setErrorMessage(message);
+
+    /*
+     * Clear the form immediately after
+     * the warning is triggered.
+     */
+    setUsername("");
+    setPassword("");
+
+    /*
+     * Reset mascot.
+     */
+    setMascotState("idle");
+
+    /*
+     * Hide warning after exactly 4 seconds.
+     */
+    errorTimerRef.current = setTimeout(() => {
+      setErrorMessage("");
+      errorTimerRef.current = null;
+    }, 4000);
+  };
+
+  /*
+   * Cleanup timer when component unmounts.
+   */
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current !== null) {
+        clearTimeout(errorTimerRef.current);
+        errorTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  /*
+   * Login handler
+   */
+  const handleLogin = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+
+    /*
+     * Stop an old warning timer when the user
+     * starts another login attempt.
+     */
+    if (errorTimerRef.current !== null) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+
+    setErrorMessage("");
+
+    /*
+     * Employee ID validation
+     */
     if (!username.trim()) {
-      setError("Employee ID is required");
+      showError("Employee ID is required!");
       return;
     }
 
+    /*
+     * Password validation
+     */
     if (!password) {
-      setError("Password is required");
+      showError("Password is required!");
       return;
     }
 
@@ -8549,37 +9153,162 @@ function Login() {
         password,
       });
 
+      /*
+       * Successful login
+       */
+      setMascotState("success");
+
       setTokens(
         tokens.access_token,
         tokens.refresh_token
       );
 
-      window.location.href = "/dashboard";
-    } catch {
-      setError(
-        "Invalid Employee ID or password"
+      /*
+       * Redirect to dashboard
+       */
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 800);
+    } catch (err: any) {
+      console.error(
+        "Login failed:",
+        err
+      );
+
+      /*
+       * Get API error message if available.
+       */
+      const apiErrorMessage =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        "Invalid Employee ID or Password!";
+
+      /*
+       * Show warning and clear form.
+       */
+      showError(
+        typeof apiErrorMessage === "string"
+          ? apiErrorMessage
+          : "Invalid Employee ID or Password!"
       );
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <main className="login-page">
+
+      {/* =========================
+          ERROR TOAST
+          ========================= */}
+      {errorMessage && (
+        <div
+          className="login-toast"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="toast-emoji">
+            😔
+          </div>
+
+          <div className="toast-content">
+            <div className="toast-title">
+              Login Failed
+            </div>
+
+            <div className="toast-message">
+              {errorMessage}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          LOGIN CARD
+          ========================= */}
       <section className="login-card">
-        <div className="login-header">
-          <h1>SFMS</h1>
-          <p>
-            Sewing Floor Management System
-          </p>
+
+        {/* BRANDING HEADER */}
+        <div className="branding-header">
+          <div className="company-badge">
+            FAKIR FASHION LTD.
+          </div>
+
+          <div className="dept-badge">
+            IPE DEPARTMENT
+          </div>
         </div>
 
+        {/* MASCOT */}
+        <div className="mascot-container">
+          <div
+            className={`mascot ${
+              mascotState === "success"
+                ? "mascot-success"
+                : ""
+            }`}
+          >
+            <div className="mascot-eyes">
+
+              <div
+                className="mascot-eye"
+                style={{
+                  transform:
+                    mascotState === "watching"
+                      ? `translate(${eyePos.x}px, ${eyePos.y}px)`
+                      : "none",
+
+                  height:
+                    mascotState === "peeking"
+                      ? "3px"
+                      : "12px",
+                }}
+              />
+
+              <div
+                className="mascot-eye"
+                style={{
+                  transform:
+                    mascotState === "watching"
+                      ? `translate(${eyePos.x}px, ${eyePos.y}px)`
+                      : "none",
+
+                  height:
+                    mascotState === "peeking"
+                      ? "3px"
+                      : "12px",
+                }}
+              />
+
+            </div>
+
+            <div className="mascot-mouth" />
+          </div>
+        </div>
+
+        {/* TITLE */}
+        <h1 className="login-title">
+          Halt! Who goes there? 🧙‍♂️
+        </h1>
+
+        <p className="login-subtitle">
+          Please identify yourself before entering.
+        </p>
+
+        {/* LOGIN FORM */}
         <form
           className="login-form"
-          onSubmit={handleSubmit}
+          onSubmit={handleLogin}
+          noValidate
         >
+
+          {/* EMPLOYEE ID */}
           <div className="form-group">
-            <label htmlFor="username">
+            <label
+              className="form-label"
+              htmlFor="username"
+            >
               Employee ID
             </label>
 
@@ -8587,58 +9316,111 @@ function Login() {
               id="username"
               type="text"
               inputMode="numeric"
+              required
+              placeholder="e.g. 10024"
               value={username}
-              onChange={(event) =>
-                setUsername(event.target.value)
+              onChange={(e) =>
+                setUsername(e.target.value)
               }
-              placeholder="Enter Employee ID"
+              onFocus={() =>
+                setMascotState("watching")
+              }
+              onBlur={() =>
+                setMascotState("idle")
+              }
+              onMouseMove={trackMouse}
+              className="form-input"
               autoComplete="username"
+              disabled={loading}
             />
           </div>
 
+          {/* PASSWORD */}
           <div className="form-group">
-            <label htmlFor="password">
+            <label
+              className="form-label"
+              htmlFor="password"
+            >
               Password
             </label>
 
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              placeholder="Enter password"
-              autoComplete="current-password"
-            />
+            <div className="input-wrapper">
+
+              <input
+                id="password"
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
+                required
+                placeholder="Keep it secret, keep it safe..."
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                onFocus={() =>
+                  setMascotState("peeking")
+                }
+                onBlur={() =>
+                  setMascotState("idle")
+                }
+                className="form-input"
+                autoComplete="current-password"
+                disabled={loading}
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
+                className="toggle-btn"
+                tabIndex={-1}
+                disabled={loading}
+              >
+                {showPassword
+                  ? "🙈 Hide"
+                  : "👁️ Peek"}
+              </button>
+
+            </div>
           </div>
 
-          {error && (
-            <div className="login-error">
-              {error}
-            </div>
-          )}
-
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
-            className="login-button"
             disabled={loading}
+            className="submit-btn"
           >
             {loading
-              ? "Signing in..."
-              : "Sign In"}
+              ? "Checking details... 🍕"
+              : "Let Me In! 🚀"}
           </button>
+
         </form>
+
+        {/* FOOTER */}
+        <div className="footer-branding">
+          <span>
+            FAKIR FASHION LTD.
+          </span>
+
+          <span>
+            IPE DEPARTMENT
+          </span>
+        </div>
+
       </section>
     </main>
   );
 }
 
-export default Login;
-
 
 ====================================================================================================
-FILE 25: frontend/src\pages\common\ComingSoon.css
+FILE 26: frontend/src\pages\common\ComingSoon.css
 ====================================================================================================
 
 /* =========================================================
@@ -9711,7 +10493,7 @@ FILE 25: frontend/src\pages\common\ComingSoon.css
 
 
 ====================================================================================================
-FILE 26: frontend/src\pages\common\ComingSoon.tsx
+FILE 27: frontend/src\pages\common\ComingSoon.tsx
 ====================================================================================================
 
 import { useNavigate } from "react-router-dom";
@@ -9847,7 +10629,7 @@ export default ComingSoon;
 
 
 ====================================================================================================
-FILE 27: frontend/src\pages\dashboard\AdminDashboard.tsx
+FILE 28: frontend/src\pages\dashboard\AdminDashboard.tsx
 ====================================================================================================
 
 function AdminDashboard() {
@@ -9887,11 +10669,827 @@ export default AdminDashboard;
 
 
 ====================================================================================================
-FILE 28: frontend/src\pages\dashboard\Dashboard.tsx
+FILE 29: frontend/src\pages\dashboard\Dashboard.css
+====================================================================================================
+
+/* =========================================================
+   SFMS DASHBOARD
+   ========================================================= */
+
+.dashboard-page {
+  min-height: 100%;
+  padding: 28px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(99, 102, 241, 0.08),
+      transparent 32%
+    ),
+    #f6f8fc;
+  color: #172033;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.dashboard-loading {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.dashboard-loading-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: dashboard-spin 0.8s linear infinite;
+}
+
+@keyframes dashboard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.dashboard-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  padding: 30px 32px;
+  margin-bottom: 30px;
+
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f8faff 55%,
+      #eef2ff 100%
+    );
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.05);
+
+  overflow: hidden;
+}
+
+.dashboard-hero::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -70px;
+  top: -100px;
+
+  border-radius: 50%;
+
+  background: rgba(99, 102, 241, 0.08);
+
+  pointer-events: none;
+}
+
+.dashboard-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 10px;
+
+  color: #6366f1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+  background: #6366f1;
+
+  box-shadow:
+    0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.dashboard-hero h1 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: clamp(25px, 3vw, 36px);
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.dashboard-hero h1 span {
+  color: #4f46e5;
+}
+
+.dashboard-hero p {
+  margin: 10px 0 0;
+
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   LIVE STATUS
+   ========================================================= */
+
+.dashboard-live-status {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 185px;
+  padding: 13px 16px;
+
+  border: 1px solid #dcfce7;
+  border-radius: 14px;
+
+  background: rgba(240, 253, 244, 0.9);
+}
+
+.live-status-dot {
+  width: 10px;
+  height: 10px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 5px rgba(34, 197, 94, 0.12);
+}
+
+.dashboard-live-status div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-live-status strong {
+  color: #166534;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dashboard-live-status small {
+  color: #4d7c5b;
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.dashboard-section {
+  margin-bottom: 30px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  margin-bottom: 16px;
+}
+
+.section-kicker {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #818cf8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #172033;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.section-heading p {
+  margin: 5px 0 0;
+
+  color: #64748b;
+  font-size: 13px;
+}
+
+.section-date {
+  padding: 7px 12px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dashboard-card {
+  position: relative;
+
+  min-height: 175px;
+  padding: 20px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 17px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 5px 18px rgba(15, 23, 42, 0.04);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  overflow: hidden;
+}
+
+.dashboard-card::before {
+  content: "";
+
+  position: absolute;
+
+  width: 90px;
+  height: 90px;
+
+  right: -35px;
+  bottom: -35px;
+
+  border-radius: 50%;
+
+  opacity: 0.45;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.08);
+
+  border-color: #d7dce5;
+}
+
+.dashboard-card-users::before {
+  background: #e0e7ff;
+}
+
+.dashboard-card-lines::before {
+  background: #dbeafe;
+}
+
+.dashboard-card-production::before {
+  background: #dcfce7;
+}
+
+.dashboard-card-efficiency::before {
+  background: #fef3c7;
+}
+
+.dashboard-card-top {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-card-icon {
+  width: 43px;
+  height: 43px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #f1f5f9;
+
+  font-size: 20px;
+}
+
+.dashboard-card-users .dashboard-card-icon {
+  background: #eef2ff;
+}
+
+.dashboard-card-lines .dashboard-card-icon {
+  background: #eff6ff;
+}
+
+.dashboard-card-production .dashboard-card-icon {
+  background: #f0fdf4;
+}
+
+.dashboard-card-efficiency .dashboard-card-icon {
+  background: #fffbeb;
+}
+
+.dashboard-card-trend {
+  min-width: 24px;
+
+  padding: 4px 7px;
+
+  border-radius: 7px;
+
+  background: #f8fafc;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+.dashboard-card-content {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  margin-top: 18px;
+}
+
+.dashboard-card-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dashboard-card-value {
+  margin-top: 4px;
+
+  color: #111827;
+
+  font-size: 31px;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+}
+
+.dashboard-card-content small {
+  margin-top: 8px;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   MAIN GRID
+   ========================================================= */
+
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 18px;
+
+  margin-bottom: 30px;
+}
+
+
+/* =========================================================
+   PANELS
+   ========================================================= */
+
+.dashboard-panel {
+  min-height: 300px;
+  padding: 22px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 5px 18px rgba(15, 23, 42, 0.04);
+}
+
+.dashboard-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dashboard-panel-header h2 {
+  margin: 0;
+
+  color: #172033;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.dashboard-panel-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 7px 10px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: #f8fafc;
+
+  color: #6366f1;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.dashboard-panel-action:hover {
+  background: #eef2ff;
+  transform: translateX(2px);
+}
+
+.dashboard-panel-action span {
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   EMPTY PRODUCTION STATE
+   ========================================================= */
+
+.production-empty-state,
+.activity-empty-state {
+  height: 220px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.production-empty-icon,
+.activity-empty-icon {
+  width: 58px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+
+  border-radius: 16px;
+
+  background: #f8fafc;
+
+  font-size: 25px;
+}
+
+.production-empty-state h3,
+.activity-empty-state h3 {
+  margin: 0;
+
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.production-empty-state p,
+.activity-empty-state p {
+  max-width: 300px;
+
+  margin: 7px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   QUICK ACCESS
+   ========================================================= */
+
+.dashboard-quick-section {
+  margin-bottom: 0;
+}
+
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.quick-access-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  position: relative;
+
+  min-height: 92px;
+  padding: 16px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 15px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.03);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.quick-access-card:hover {
+  transform: translateY(-3px);
+
+  border-color: #c7d2fe;
+
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.07);
+}
+
+.quick-access-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #f1f5f9;
+
+  font-size: 19px;
+}
+
+.quick-access-card:nth-child(1) .quick-access-icon {
+  background: #eef2ff;
+}
+
+.quick-access-card:nth-child(2) .quick-access-icon {
+  background: #eff6ff;
+}
+
+.quick-access-card:nth-child(3) .quick-access-icon {
+  background: #f0fdf4;
+}
+
+.quick-access-card:nth-child(4) .quick-access-icon {
+  background: #fffbeb;
+}
+
+.quick-access-content {
+  min-width: 0;
+  padding-right: 18px;
+}
+
+.quick-access-content strong {
+  display: block;
+
+  color: #1e293b;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.quick-access-content p {
+  margin: 4px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.quick-access-arrow {
+  position: absolute;
+  right: 13px;
+
+  color: #cbd5e1;
+
+  font-size: 17px;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.quick-access-card:hover .quick-access-arrow {
+  color: #6366f1;
+  transform: translateX(3px);
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .dashboard-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quick-access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — SMALL TABLET
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+  .dashboard-page {
+    padding: 18px;
+  }
+
+  .dashboard-hero {
+    flex-direction: column;
+    align-items: flex-start;
+
+    padding: 24px;
+  }
+
+  .dashboard-live-status {
+    width: 100%;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .dashboard-card {
+    min-height: 160px;
+    padding: 16px;
+  }
+
+  .dashboard-card-value {
+    font-size: 27px;
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 520px) {
+
+  .dashboard-page {
+    padding: 14px;
+  }
+
+  .dashboard-hero {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .dashboard-hero h1 {
+    font-size: 25px;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-main-grid {
+    gap: 14px;
+  }
+
+  .dashboard-panel {
+    padding: 18px;
+  }
+
+  .quick-access-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+  }
+
+  .section-date {
+    display: none;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .dashboard-card,
+  .quick-access-card,
+  .dashboard-panel-action,
+  .quick-access-arrow {
+    transition: none;
+  }
+
+  .dashboard-loading-spinner {
+    animation: none;
+  }
+}
+
+
+====================================================================================================
+FILE 30: frontend/src\pages\dashboard\Dashboard.tsx
 ====================================================================================================
 
 import { useAuth } from "../../hooks/useAuth";
 import DashboardLayout from "../../layouts/DashboardLayout";
+import "./Dashboard.css";
+
 
 function Dashboard() {
   const { user, loading } = useAuth();
@@ -10139,7 +11737,7 @@ export default Dashboard;
 
 
 ====================================================================================================
-FILE 29: frontend/src\pages\dashboard\DGMDashboard.tsx
+FILE 31: frontend/src\pages\dashboard\DGMDashboard.tsx
 ====================================================================================================
 
 function DGMDashboard() {
@@ -10179,7 +11777,7 @@ export default DGMDashboard;
 
 
 ====================================================================================================
-FILE 30: frontend/src\pages\dashboard\FloorDashboard.tsx
+FILE 32: frontend/src\pages\dashboard\FloorDashboard.tsx
 ====================================================================================================
 
 function FloorDashboard() {
@@ -10242,7 +11840,7 @@ export default FloorDashboard;
 
 
 ====================================================================================================
-FILE 31: frontend/src\pages\dashboard\ManagerDashboard.tsx
+FILE 33: frontend/src\pages\dashboard\ManagerDashboard.tsx
 ====================================================================================================
 
 function ManagerDashboard() {
@@ -10282,7 +11880,7 @@ export default ManagerDashboard;
 
 
 ====================================================================================================
-FILE 32: frontend/src\pages\dashboard\SupervisorDashboard.tsx
+FILE 34: frontend/src\pages\dashboard\SupervisorDashboard.tsx
 ====================================================================================================
 
 function SupervisorDashboard() {
@@ -10322,7 +11920,1857 @@ export default SupervisorDashboard;
 
 
 ====================================================================================================
-FILE 33: frontend/src\pages\organization\Organization.css
+FILE 35: frontend/src\pages\layoutus\Layouts.css
+====================================================================================================
+
+[EMPTY FILE]
+
+
+====================================================================================================
+FILE 36: frontend/src\pages\layoutus\Layouts.tsx
+====================================================================================================
+
+[EMPTY FILE]
+
+
+====================================================================================================
+FILE 37: frontend/src\pages\lines\LineDetails.css
+====================================================================================================
+
+/* ============================================================
+   LINE DETAILS PAGE
+   ============================================================ */
+
+.line-details-page {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.line-details-header {
+  margin-bottom: 28px;
+}
+
+.line-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.18));
+  border-radius: 10px;
+
+  background: var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  padding: 8px 13px;
+  margin-bottom: 20px;
+
+  color: inherit;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.line-back-button:hover {
+  background: var(--card-hover-bg, rgba(127, 127, 127, 0.08));
+
+  border-color: rgba(37, 99, 235, 0.25);
+
+  transform: translateX(-2px);
+
+  box-shadow:
+    0 5px 18px rgba(0, 0, 0, 0.05);
+}
+
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+
+.line-title-row {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  padding: 26px 28px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.15));
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.07),
+      transparent 42%
+    ),
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 12px 35px rgba(15, 23, 42, 0.06);
+
+  overflow: hidden;
+}
+
+.line-title-row::before {
+  content: "";
+
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  top: -100px;
+  right: -50px;
+
+  border-radius: 50%;
+
+  background: rgba(37, 99, 235, 0.08);
+
+  pointer-events: none;
+}
+
+.line-title-row > * {
+  position: relative;
+  z-index: 1;
+}
+
+.line-eyebrow {
+  margin: 0 0 8px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  color: #2563eb;
+
+  opacity: 0.9;
+}
+
+.line-title-row h1 {
+  margin: 0;
+
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.05;
+
+  font-weight: 800;
+
+  letter-spacing: -0.035em;
+}
+
+.line-subtitle {
+  margin: 10px 0 0;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  opacity: 0.62;
+}
+
+
+/* ============================================================
+   LINE ACTIVE / INACTIVE BADGES
+   ============================================================ */
+
+.line-active-badge,
+.line-inactive-badge,
+.layout-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 31px;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.04em;
+
+  white-space: nowrap;
+}
+
+.line-active-badge {
+  border: 1px solid rgba(34, 197, 94, 0.2);
+
+  background: rgba(34, 197, 94, 0.1);
+
+  color: #16a34a;
+}
+
+.line-active-badge::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+.line-inactive-badge {
+  border: 1px solid rgba(239, 68, 68, 0.2);
+
+  background: rgba(239, 68, 68, 0.1);
+
+  color: #dc2626;
+}
+
+.line-inactive-badge::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #ef4444;
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.line-details-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 14px 16px;
+
+  margin-bottom: 24px;
+
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 13px;
+
+  background: rgba(239, 68, 68, 0.07);
+
+  color: #dc2626;
+
+  font-size: 14px;
+
+  box-shadow:
+    0 5px 18px rgba(239, 68, 68, 0.04);
+}
+
+
+/* ============================================================
+   SUMMARY CARDS
+   ============================================================ */
+
+.line-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-bottom: 32px;
+}
+
+.line-summary-card {
+  position: relative;
+
+  min-width: 0;
+
+  padding: 21px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.14));
+  border-radius: 17px;
+
+  background: var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 7px 24px rgba(15, 23, 42, 0.045);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.line-summary-card::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 3px;
+
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    rgba(37, 99, 235, 0)
+  );
+
+  opacity: 0;
+
+  transition: opacity 0.22s ease;
+}
+
+.line-summary-card:hover {
+  transform: translateY(-3px);
+
+  border-color: rgba(37, 99, 235, 0.18);
+
+  box-shadow:
+    0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.line-summary-card:hover::after {
+  opacity: 1;
+}
+
+.line-summary-card span,
+.layout-summary-grid span,
+.layout-summary-top span,
+.line-status-reason span,
+.layout-notes span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+
+  opacity: 0.48;
+}
+
+.line-summary-card strong {
+  display: block;
+
+  font-size: 20px;
+  line-height: 1.2;
+
+  font-weight: 750;
+
+  letter-spacing: -0.015em;
+}
+
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+
+.line-details-section {
+  margin-top: 32px;
+}
+
+.line-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 15px;
+}
+
+.line-section-label {
+  margin: 0 0 5px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  color: #2563eb;
+
+  opacity: 0.85;
+}
+
+.line-section-heading h2 {
+  margin: 0;
+
+  font-size: 21px;
+  line-height: 1.2;
+
+  font-weight: 750;
+
+  letter-spacing: -0.02em;
+}
+
+
+/* ============================================================
+   STATUS PANEL
+   ============================================================ */
+
+.line-status-panel {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 28px;
+
+  padding: 25px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.15));
+  border-radius: 19px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.035),
+      transparent 55%
+    ),
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 9px 28px rgba(15, 23, 42, 0.05);
+
+  overflow: hidden;
+}
+
+.line-status-panel::before {
+  content: "";
+
+  position: absolute;
+
+  width: 220px;
+  height: 220px;
+
+  right: -120px;
+  top: -130px;
+
+  border-radius: 50%;
+
+  background: rgba(37, 99, 235, 0.06);
+
+  pointer-events: none;
+}
+
+.line-status-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.line-status-main {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+
+  min-width: 0;
+}
+
+.line-status-indicator {
+  width: 15px;
+  height: 15px;
+
+  border-radius: 50%;
+
+  flex: 0 0 auto;
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+/* ============================================================
+   STATUS COLORS
+   ============================================================ */
+
+.status-running {
+  color: #16a34a;
+}
+
+.line-status-indicator.status-running {
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 5px rgba(34, 197, 94, 0.11),
+    0 0 18px rgba(34, 197, 94, 0.25);
+
+  animation: lineStatusPulse 2s infinite;
+}
+
+.status-layout {
+  color: #d97706;
+}
+
+.line-status-indicator.status-layout {
+  background: #f59e0b;
+
+  box-shadow:
+    0 0 0 5px rgba(245, 158, 11, 0.11);
+}
+
+.status-off {
+  color: #dc2626;
+}
+
+.line-status-indicator.status-off {
+  background: #ef4444;
+
+  box-shadow:
+    0 0 0 5px rgba(239, 68, 68, 0.11);
+}
+
+.status-unknown {
+  color: #64748b;
+}
+
+.line-status-indicator.status-unknown {
+  background: #94a3b8;
+
+  box-shadow:
+    0 0 0 5px rgba(148, 163, 184, 0.1);
+}
+
+
+/* ============================================================
+   STATUS TEXT
+   ============================================================ */
+
+.line-status-main strong {
+  display: block;
+
+  font-size: 19px;
+  line-height: 1.2;
+
+  font-weight: 800;
+
+  letter-spacing: -0.015em;
+}
+
+.line-status-main p {
+  margin: 5px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.45;
+
+  opacity: 0.58;
+}
+
+
+/* ============================================================
+   STATUS REASON
+   ============================================================ */
+
+.line-status-reason {
+  min-width: 240px;
+
+  padding-left: 24px;
+
+  border-left: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.15));
+}
+
+.line-status-reason p,
+.layout-notes p {
+  margin: 0;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+  opacity: 0.8;
+}
+
+
+/* ============================================================
+   LAYOUT CARD
+   ============================================================ */
+
+.layout-summary-card {
+  position: relative;
+
+  padding: 25px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.15));
+  border-radius: 19px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.025),
+      transparent 50%
+    ),
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 9px 28px rgba(15, 23, 42, 0.05);
+
+  overflow: hidden;
+}
+
+.layout-summary-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 3px;
+
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    #60a5fa,
+    transparent
+  );
+
+  opacity: 0.75;
+}
+
+
+/* ============================================================
+   LAYOUT HEADER
+   ============================================================ */
+
+.layout-summary-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 25px;
+}
+
+.layout-summary-top strong {
+  display: block;
+
+  font-size: 23px;
+
+  line-height: 1.2;
+
+  font-weight: 800;
+
+  letter-spacing: -0.025em;
+}
+
+.layout-status-badge {
+  color: inherit;
+
+  background: rgba(127, 127, 127, 0.08);
+
+  border: 1px solid
+    rgba(127, 127, 127, 0.12);
+}
+
+
+/* ============================================================
+   LAYOUT INFORMATION GRID
+   ============================================================ */
+
+.layout-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 1px;
+
+  border: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.1));
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  background:
+    var(--border-color, rgba(127, 127, 127, 0.1));
+}
+
+.layout-summary-grid > div {
+  min-width: 0;
+
+  padding: 17px;
+
+  background:
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  transition:
+    background 0.2s ease;
+}
+
+.layout-summary-grid > div:hover {
+  background:
+    var(--card-hover-bg, rgba(127, 127, 127, 0.055));
+}
+
+.layout-summary-grid strong {
+  display: block;
+
+  font-size: 15px;
+
+  line-height: 1.35;
+
+  font-weight: 700;
+
+  word-break: break-word;
+}
+
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+
+.layout-notes {
+  margin-top: 23px;
+
+  padding: 19px;
+
+  border: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.1));
+
+  border-radius: 13px;
+
+  background:
+    rgba(127, 127, 127, 0.025);
+}
+
+.layout-notes span {
+  margin-bottom: 8px;
+}
+
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.layout-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 23px;
+  padding-top: 19px;
+
+  border-top: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.12));
+}
+
+.layout-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 40px;
+
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 10px;
+
+  padding: 9px 16px;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.layout-actions button:hover {
+  background: #1d4ed8;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 9px 22px rgba(37, 99, 235, 0.25);
+}
+
+.layout-actions button:active {
+  transform: translateY(0);
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.line-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 150px;
+
+  padding: 30px;
+
+  border: 1px dashed
+    rgba(127, 127, 127, 0.25);
+
+  border-radius: 17px;
+
+  background:
+    rgba(127, 127, 127, 0.018);
+
+  text-align: center;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  opacity: 0.65;
+}
+
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+
+.line-details-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 320px;
+
+  padding: 60px 20px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  opacity: 0.65;
+}
+
+.line-details-loading::before {
+  content: "";
+
+  width: 34px;
+  height: 34px;
+
+  margin-bottom: 15px;
+
+  border: 3px solid
+    rgba(127, 127, 127, 0.18);
+
+  border-top-color: #2563eb;
+
+  border-radius: 50%;
+
+  animation: lineDetailsSpin 0.8s linear infinite;
+}
+
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes lineStatusPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 5px rgba(34, 197, 94, 0.11),
+      0 0 18px rgba(34, 197, 94, 0.2);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(34, 197, 94, 0.04),
+      0 0 24px rgba(34, 197, 94, 0.28);
+  }
+}
+
+@keyframes lineDetailsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1050px) {
+  .line-details-page {
+    padding: 25px;
+  }
+
+  .line-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .layout-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .line-status-panel {
+    align-items: flex-start;
+  }
+}
+
+
+/* ============================================================
+   SMALL TABLET
+   ============================================================ */
+
+@media (max-width: 800px) {
+  .line-title-row {
+    padding: 23px;
+  }
+
+  .line-status-panel {
+    flex-direction: column;
+  }
+
+  .line-status-reason {
+    width: 100%;
+    min-width: 0;
+
+    padding-left: 0;
+    padding-top: 18px;
+
+    border-left: none;
+
+    border-top: 1px solid
+      var(--border-color, rgba(127, 127, 127, 0.15));
+  }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 650px) {
+  .line-details-page {
+    padding: 18px 14px;
+  }
+
+  .line-details-header {
+    margin-bottom: 22px;
+  }
+
+  .line-back-button {
+    margin-bottom: 14px;
+  }
+
+  .line-title-row {
+    flex-direction: column;
+
+    padding: 21px 18px;
+
+    border-radius: 17px;
+  }
+
+  .line-title-row h1 {
+    font-size: 30px;
+  }
+
+  .line-summary-grid {
+    grid-template-columns: 1fr;
+
+    gap: 11px;
+
+    margin-bottom: 25px;
+  }
+
+  .line-summary-card {
+    padding: 17px;
+  }
+
+  .line-details-section {
+    margin-top: 25px;
+  }
+
+  .line-section-heading h2 {
+    font-size: 19px;
+  }
+
+  .line-status-panel {
+    padding: 20px;
+
+    border-radius: 16px;
+  }
+
+  .line-status-main {
+    align-items: flex-start;
+  }
+
+  .line-status-main strong {
+    font-size: 17px;
+  }
+
+  .layout-summary-card {
+    padding: 20px;
+
+    border-radius: 16px;
+  }
+
+  .layout-summary-top {
+    flex-direction: column;
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+  }
+
+  .layout-summary-top strong {
+    font-size: 20px;
+  }
+
+  .layout-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .layout-summary-grid > div {
+    padding: 14px 15px;
+  }
+
+  .layout-notes {
+    padding: 16px;
+
+    margin-top: 18px;
+  }
+
+  .layout-actions {
+    justify-content: stretch;
+  }
+
+  .layout-actions button {
+    width: 100%;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 400px) {
+  .line-details-page {
+    padding: 15px 11px;
+  }
+
+  .line-title-row {
+    padding: 18px 16px;
+  }
+
+  .line-title-row h1 {
+    font-size: 27px;
+  }
+
+  .line-subtitle {
+    font-size: 13px;
+  }
+
+  .line-summary-card {
+    padding: 15px;
+  }
+
+  .line-status-panel {
+    padding: 17px;
+  }
+
+  .line-status-reason {
+    padding-top: 15px;
+  }
+
+  .layout-summary-card {
+    padding: 17px;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .line-status-indicator.status-running,
+  .line-details-loading::before {
+    animation: none;
+  }
+
+  .line-summary-card,
+  .line-back-button,
+  .layout-actions button {
+    transition: none;
+  }
+}
+
+
+/* ============================================================
+   REDESIGNED PAGE - SMALL UI POLISH
+   ============================================================ */
+
+.line-details-error span:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+
+  background: rgba(239, 68, 68, 0.12);
+
+  font-size: 13px;
+}
+
+
+.line-empty-state strong {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: inherit;
+
+  font-size: 15px;
+  font-weight: 750;
+
+  opacity: 0.85;
+}
+
+
+.line-empty-state span {
+  display: block;
+
+  max-width: 420px;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+  opacity: 0.65;
+}
+
+
+/* Better status typography inside summary cards */
+
+.line-summary-card strong.status-running,
+.line-summary-card strong.status-layout,
+.line-summary-card strong.status-off,
+.line-summary-card strong.status-unknown {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+
+/* Status indicator inside status text */
+
+.line-summary-card strong.status-running::before,
+.line-summary-card strong.status-layout::before,
+.line-summary-card strong.status-off::before,
+.line-summary-card strong.status-unknown::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+}
+
+
+.line-summary-card strong.status-running::before {
+  background: #22c55e;
+}
+
+
+.line-summary-card strong.status-layout::before {
+  background: #f59e0b;
+}
+
+
+.line-summary-card strong.status-off::before {
+  background: #ef4444;
+}
+
+
+.line-summary-card strong.status-unknown::before {
+  background: #94a3b8;
+}
+
+
+/* Improve layout action arrow */
+
+.layout-actions button span {
+  display: inline-flex;
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+.layout-actions button:hover span {
+  transform: translateX(3px);
+}
+
+
+/* Better focus accessibility */
+
+.line-back-button:focus-visible,
+.layout-actions button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 3px;
+}
+
+
+/* Mobile error */
+
+@media (max-width: 650px) {
+  .line-details-error {
+    align-items: flex-start;
+  }
+
+  .line-empty-state {
+    padding: 24px 18px;
+  }
+}
+
+
+====================================================================================================
+FILE 38: frontend/src\pages\lines\LineDetails.tsx
+====================================================================================================
+
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import DashboardLayout from "../../layouts/DashboardLayout";
+import { getLine } from "../../services/lineService";
+import api from "../../services/api";
+
+import "./LineDetails.css";
+
+interface Line {
+  id: number;
+  line_number: number;
+  name: string;
+  organization_unit_id: number;
+  is_active: boolean;
+}
+
+interface LineStatus {
+  id: number;
+  line_id: number;
+  status: string;
+  reason?: string | null;
+  started_at: string;
+  ended_at?: string | null;
+}
+
+interface Layout {
+  id: number;
+  line_id: number;
+  buyer: string;
+  style?: string | null;
+  job?: string | null;
+  smv: number;
+  required_machine_count?: number | null;
+  total_machines: number;
+  status: string;
+  started_at: string;
+  completed_at?: string | null;
+  duration_minutes?: number | null;
+  is_active?: boolean | null;
+  notes?: string | null;
+}
+
+function LineDetails() {
+  const { lineId } = useParams<{ lineId: string }>();
+  const navigate = useNavigate();
+
+  const [line, setLine] = useState<Line | null>(null);
+  const [status, setStatus] = useState<LineStatus | null>(null);
+  const [layout, setLayout] = useState<Layout | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!lineId) {
+      setError("Line ID is missing.");
+      setLoading(false);
+      return;
+    }
+
+    async function loadLineDetails() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const id = Number(lineId);
+
+        if (!Number.isInteger(id) || id <= 0) {
+          setError("Invalid line ID.");
+          return;
+        }
+
+        const lineResult = await getLine(id);
+        setLine(lineResult);
+
+        const [statusResult, layoutResult] = await Promise.all([
+          api.get<LineStatus | null>(
+            `/line-status/${id}`,
+          ),
+          api.get<Layout | null>(
+            `/layouts/line/${id}/active`,
+          ),
+        ]);
+
+        setStatus(statusResult.data);
+        setLayout(layoutResult.data);
+      } catch (err: any) {
+        setError(
+          err.response?.data?.detail ??
+            "Failed to load line details.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadLineDetails();
+  }, [lineId]);
+
+  function formatDate(value?: string | null) {
+    if (!value) return "—";
+
+    return new Date(value).toLocaleString();
+  }
+
+  function getStatusClass(value?: string | null) {
+    switch (value) {
+      case "RUNNING":
+        return "status-running";
+
+      case "LAYOUT":
+        return "status-layout";
+
+      case "OFF":
+        return "status-off";
+
+      default:
+        return "status-unknown";
+    }
+  }
+
+  function getStatusLabel(value?: string | null) {
+    switch (value) {
+      case "RUNNING":
+        return "Running";
+
+      case "LAYOUT":
+        return "Layout Change";
+
+      case "OFF":
+        return "Off";
+
+      default:
+        return "No Status";
+    }
+  }
+
+  function getStatusDescription(value?: string | null) {
+    switch (value) {
+      case "RUNNING":
+        return "Production line is currently operational.";
+
+      case "LAYOUT":
+        return "The line is currently undergoing layout activity.";
+
+      case "OFF":
+        return "The production line is currently stopped.";
+
+      default:
+        return "No current operational status is available.";
+    }
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="line-details-page">
+          <div className="line-details-loading">
+            Loading line details...
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="line-details-page">
+
+        {/* ======================================================
+            HEADER
+        ====================================================== */}
+
+        <header className="line-details-header">
+
+          <button
+            type="button"
+            className="line-back-button"
+            onClick={() => navigate("/organizations")}
+          >
+            <span aria-hidden="true">←</span>
+            Back to Organizations
+          </button>
+
+          {line && (
+            <div className="line-title-row">
+
+              <div>
+                <p className="line-eyebrow">
+                  SFMS • Production Line
+                </p>
+
+                <h1>
+                  Line {line.line_number}
+                </h1>
+
+                <p className="line-subtitle">
+                  {line.name}
+                </p>
+              </div>
+
+              <div>
+                <span
+                  className={
+                    line.is_active
+                      ? "line-active-badge"
+                      : "line-inactive-badge"
+                  }
+                >
+                  {line.is_active
+                    ? "Active Line"
+                    : "Inactive Line"}
+                </span>
+              </div>
+
+            </div>
+          )}
+
+        </header>
+
+
+        {/* ======================================================
+            ERROR
+        ====================================================== */}
+
+        {error && (
+          <div
+            className="line-details-error"
+            role="alert"
+          >
+            <span aria-hidden="true">⚠</span>
+            <span>{error}</span>
+          </div>
+        )}
+
+
+        {line && !error && (
+          <>
+
+            {/* ==================================================
+                QUICK SUMMARY
+            ================================================== */}
+
+            <section className="line-summary-grid">
+
+              <div className="line-summary-card">
+                <span>Line Number</span>
+
+                <strong>
+                  {line.line_number}
+                </strong>
+              </div>
+
+
+              <div className="line-summary-card">
+                <span>Line Name</span>
+
+                <strong>
+                  {line.name}
+                </strong>
+              </div>
+
+
+              <div className="line-summary-card">
+                <span>Current Status</span>
+
+                <strong
+                  className={getStatusClass(
+                    status?.status,
+                  )}
+                >
+                  {getStatusLabel(status?.status)}
+                </strong>
+              </div>
+
+
+              <div className="line-summary-card">
+                <span>Active Layout</span>
+
+                <strong>
+                  {layout ? "Assigned" : "None"}
+                </strong>
+              </div>
+
+            </section>
+
+
+            {/* ==================================================
+                LIVE STATUS
+            ================================================== */}
+
+            <section className="line-details-section">
+
+              <div className="line-section-heading">
+                <div>
+                  <p className="line-section-label">
+                    LIVE INFORMATION
+                  </p>
+
+                  <h2>
+                    Current Line Status
+                  </h2>
+                </div>
+              </div>
+
+
+              {status ? (
+
+                <div className="line-status-panel">
+
+                  <div className="line-status-main">
+
+                    <span
+                      className={`line-status-indicator ${getStatusClass(
+                        status.status,
+                      )}`}
+                      aria-hidden="true"
+                    />
+
+                    <div>
+
+                      <strong
+                        className={getStatusClass(
+                          status.status,
+                        )}
+                      >
+                        {getStatusLabel(
+                          status.status,
+                        )}
+                      </strong>
+
+                      <p>
+                        {getStatusDescription(
+                          status.status,
+                        )}
+                      </p>
+
+                      <p>
+                        Started{" "}
+                        {formatDate(
+                          status.started_at,
+                        )}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+
+                  {status.reason && (
+                    <div className="line-status-reason">
+
+                      <span>
+                        Current Reason
+                      </span>
+
+                      <p>
+                        {status.reason}
+                      </p>
+
+                    </div>
+                  )}
+
+                </div>
+
+              ) : (
+
+                <div className="line-empty-state">
+
+                  <strong>
+                    No current status
+                  </strong>
+
+                  <span>
+                    No operational status has been
+                    recorded for this line.
+                  </span>
+
+                </div>
+
+              )}
+
+            </section>
+
+
+            {/* ==================================================
+                ACTIVE LAYOUT
+            ================================================== */}
+
+            <section className="line-details-section">
+
+              <div className="line-section-heading">
+
+                <div>
+                  <p className="line-section-label">
+                    PRODUCTION
+                  </p>
+
+                  <h2>
+                    Active Layout
+                  </h2>
+                </div>
+
+              </div>
+
+
+              {layout ? (
+
+                <div className="layout-summary-card">
+
+                  {/* Layout Header */}
+
+                  <div className="layout-summary-top">
+
+                    <div>
+                      <span>
+                        Buyer
+                      </span>
+
+                      <strong>
+                        {layout.buyer}
+                      </strong>
+                    </div>
+
+
+                    <span
+                      className={`layout-status-badge ${getStatusClass(
+                        layout.status,
+                      )}`}
+                    >
+                      {getStatusLabel(
+                        layout.status,
+                      )}
+                    </span>
+
+                  </div>
+
+
+                  {/* Layout Information */}
+
+                  <div className="layout-summary-grid">
+
+                    <div>
+                      <span>
+                        Style
+                      </span>
+
+                      <strong>
+                        {layout.style ?? "—"}
+                      </strong>
+                    </div>
+
+
+                    <div>
+                      <span>
+                        Job
+                      </span>
+
+                      <strong>
+                        {layout.job ?? "—"}
+                      </strong>
+                    </div>
+
+
+                    <div>
+                      <span>
+                        SMV
+                      </span>
+
+                      <strong>
+                        {layout.smv}
+                      </strong>
+                    </div>
+
+
+                    <div>
+                      <span>
+                        Total Machines
+                      </span>
+
+                      <strong>
+                        {layout.total_machines}
+                      </strong>
+                    </div>
+
+
+                    <div>
+                      <span>
+                        Required Machines
+                      </span>
+
+                      <strong>
+                        {layout.required_machine_count ??
+                          "—"}
+                      </strong>
+                    </div>
+
+
+                    <div>
+                      <span>
+                        Started
+                      </span>
+
+                      <strong>
+                        {formatDate(
+                          layout.started_at,
+                        )}
+                      </strong>
+                    </div>
+
+                  </div>
+
+
+                  {/* Notes */}
+
+                  {layout.notes && (
+                    <div className="layout-notes">
+
+                      <span>
+                        Notes
+                      </span>
+
+                      <p>
+                        {layout.notes}
+                      </p>
+
+                    </div>
+                  )}
+
+
+                  {/* Action */}
+
+                  <div className="layout-actions">
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/layout/${layout.id}`,
+                        )
+                      }
+                    >
+                      View Layout
+                      <span aria-hidden="true">
+                        →
+                      </span>
+                    </button>
+
+                  </div>
+
+                </div>
+
+              ) : (
+
+                <div className="line-empty-state">
+
+                  <strong>
+                    No active layout
+                  </strong>
+
+                  <span>
+                    No active production layout is
+                    currently assigned to this line.
+                  </span>
+
+                </div>
+
+              )}
+
+            </section>
+
+          </>
+        )}
+
+      </div>
+    </DashboardLayout>
+  );
+}
+
+export default LineDetails;
+
+
+====================================================================================================
+FILE 39: frontend/src\pages\organization\Organization.css
 ====================================================================================================
 
 /* ============================================================
@@ -11133,9 +14581,33 @@ FILE 33: frontend/src\pages\organization\Organization.css
 }
 
 
+.line-view-button {
+  border: 1px solid #d0d5dd;
+  background: #ffffff;
+  color: #344054;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.line-view-button:hover {
+  background: #f8fafc;
+  border-color: #98a2b3;
+}
+
+.line-view-button:active {
+  transform: translateY(1px);
+}
+
 
 ====================================================================================================
-FILE 34: frontend/src\pages\organization\Organization.tsx
+FILE 40: frontend/src\pages\organization\Organization.tsx
 ====================================================================================================
 
 import { useEffect, useMemo, useState } from "react";
@@ -11161,13 +14633,13 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import "./Organization.css";
 
 
-
 type UnitForm = {
   name: string;
   code: string;
   unit_type: "GROUP" | "UNIT";
   parent_id: number | null;
 };
+
 
 type LineForm = {
   line_number: string;
@@ -11261,6 +14733,7 @@ function Organization() {
       setLoading(false);
 
     }
+
   }
 
 
@@ -11302,6 +14775,7 @@ function Organization() {
         (a, b) =>
           a.code.localeCompare(b.code),
       );
+
   }
 
 
@@ -11321,6 +14795,7 @@ function Organization() {
             )
           : [...previous, groupId],
     );
+
   }
 
 
@@ -11345,7 +14820,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     setExpandedUnits(
       (previous) => [
@@ -11353,6 +14830,7 @@ function Organization() {
         unitId,
       ],
     );
+
 
     if (!lines[unitId]) {
 
@@ -11376,7 +14854,9 @@ function Organization() {
         );
 
       }
+
     }
+
   }
 
 
@@ -11385,8 +14865,10 @@ function Organization() {
   // ==========================================================
 
   function clearMessages() {
+
     setError("");
     setMessage("");
+
   }
 
 
@@ -11408,6 +14890,7 @@ function Organization() {
     });
 
     setShowUnitForm(true);
+
   }
 
 
@@ -11431,6 +14914,7 @@ function Organization() {
     });
 
     setShowUnitForm(true);
+
   }
 
 
@@ -11456,6 +14940,7 @@ function Organization() {
     });
 
     setShowUnitForm(true);
+
   }
 
 
@@ -11478,7 +14963,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     if (!unitForm.code.trim()) {
 
@@ -11487,7 +14974,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     try {
 
@@ -11526,6 +15015,7 @@ function Organization() {
         setMessage(
           "Organization created successfully.",
         );
+
       }
 
       setShowUnitForm(false);
@@ -11544,6 +15034,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -11591,6 +15082,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -11614,6 +15106,7 @@ function Organization() {
     });
 
     setShowLineForm(true);
+
   }
 
 
@@ -11640,6 +15133,7 @@ function Organization() {
     });
 
     setShowLineForm(true);
+
   }
 
 
@@ -11658,6 +15152,7 @@ function Organization() {
     const lineNumber =
       Number(lineForm.line_number);
 
+
     if (
       !Number.isInteger(lineNumber) ||
       lineNumber <= 0
@@ -11668,7 +15163,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     if (!lineForm.name.trim()) {
 
@@ -11677,7 +15174,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     try {
 
@@ -11707,7 +15206,9 @@ function Organization() {
           );
 
           return;
+
         }
+
 
         await createLine(
           selectedUnitId,
@@ -11724,9 +15225,12 @@ function Organization() {
         setMessage(
           "Line created successfully.",
         );
+
       }
 
+
       setShowLineForm(false);
+
 
       if (selectedUnitId) {
 
@@ -11742,6 +15246,7 @@ function Organization() {
               result,
           }),
         );
+
       }
 
     } catch (err: any) {
@@ -11756,6 +15261,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -11789,6 +15295,7 @@ function Organization() {
         }.`,
       );
 
+
       const result =
         await getUnitLines(
           line.organization_unit_id,
@@ -11814,6 +15321,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -11825,13 +15333,18 @@ function Organization() {
 
     return (
       <DashboardLayout>
+
         <div className="organization-page">
+
           <div className="organization-loading">
             Loading organization structure...
           </div>
+
         </div>
+
       </DashboardLayout>
     );
+
   }
 
 
@@ -11841,803 +15354,886 @@ function Organization() {
 
   return (
     <DashboardLayout>
+
       <div className="organization-page">
 
         <button
           type="button"
           className="secondary-button organization-back-button"
-          onClick={() => navigate("/dashboard")}
+          onClick={() =>
+            navigate("/dashboard")
+          }
         >
           ← Back to Dashboard
         </button>
 
+
         <div className="organization-header">
 
-        <div>
+          <div>
 
-          <div className="organization-eyebrow">
-            SFMS • Administration
+            <div className="organization-eyebrow">
+              SFMS • Administration
+            </div>
+
+            <h1>
+              Organization Management
+            </h1>
+
+            <p>
+              Manage groups, units and production
+              lines from one place.
+            </p>
+
           </div>
 
-          <h1>
-            Organization Management
-          </h1>
 
-          <p>
-            Manage groups, units and production
-            lines from one place.
-          </p>
+          <button
+            type="button"
+            className="organization-primary-button"
+            onClick={openAddGroup}
+          >
+            + Add Group
+          </button>
 
         </div>
 
-        <button
-          type="button"
-          className="organization-primary-button"
-          onClick={openAddGroup}
-        >
-          + Add Group
-        </button>
 
-      </div>
+        {message && (
+          <div className="organization-message">
+            ✓ {message}
+          </div>
+        )}
 
 
-      {message && (
-        <div className="organization-message">
-          ✓ {message}
+        {error && (
+          <div className="organization-error">
+            {error}
+          </div>
+        )}
+
+
+        <div className="organization-summary">
+
+          <div className="organization-summary-card">
+
+            <span>
+              Groups
+            </span>
+
+            <strong>
+              {groups.length}
+            </strong>
+
+          </div>
+
+
+          <div className="organization-summary-card">
+
+            <span>
+              Units
+            </span>
+
+            <strong>
+              {
+                organizations.filter(
+                  (item) =>
+                    item.unit_type === "UNIT",
+                ).length
+              }
+            </strong>
+
+          </div>
+
+
+          <div className="organization-summary-card">
+
+            <span>
+              Lines Loaded
+            </span>
+
+            <strong>
+              {
+                Object.values(lines)
+                  .flat()
+                  .length
+              }
+            </strong>
+
+          </div>
+
+
+          <div className="organization-summary-card">
+
+            <span>
+              Active Units
+            </span>
+
+            <strong>
+              {
+                organizations.filter(
+                  (item) =>
+                    item.is_active,
+                ).length
+              }
+            </strong>
+
+          </div>
+
         </div>
-      )}
 
 
-      {error && (
-        <div className="organization-error">
-          {error}
-        </div>
-      )}
+        <div className="organization-tree">
+
+          {groups.map((group) => {
+
+            const groupUnits =
+              getGroupUnits(group.id);
+
+            const groupExpanded =
+              expandedGroups.includes(
+                group.id,
+              );
 
 
-      <div className="organization-summary">
+            return (
 
-        <div className="organization-summary-card">
-          <span>Groups</span>
-          <strong>
-            {groups.length}
-          </strong>
-        </div>
+              <section
+                className={`organization-group ${
+                  !group.is_active
+                    ? "inactive"
+                    : ""
+                }`}
+                key={group.id}
+              >
 
-        <div className="organization-summary-card">
-          <span>Units</span>
-          <strong>
-            {
-              organizations.filter(
-                (item) =>
-                  item.unit_type === "UNIT",
-              ).length
-            }
-          </strong>
-        </div>
-
-        <div className="organization-summary-card">
-          <span>Lines Loaded</span>
-          <strong>
-            {
-              Object.values(lines)
-                .flat()
-                .length
-            }
-          </strong>
-        </div>
-
-        <div className="organization-summary-card">
-          <span>Active Units</span>
-          <strong>
-            {
-              organizations.filter(
-                (item) =>
-                  item.is_active,
-              ).length
-            }
-          </strong>
-        </div>
-
-      </div>
-
-
-      <div className="organization-tree">
-
-        {groups.map((group) => {
-
-          const groupUnits =
-            getGroupUnits(group.id);
-
-          const groupExpanded =
-            expandedGroups.includes(
-              group.id,
-            );
-
-          return (
-            <section
-              className={`organization-group ${
-                !group.is_active
-                  ? "inactive"
-                  : ""
-              }`}
-              key={group.id}
-            >
-
-              <div className="organization-group-header">
-
-                <button
-                  type="button"
-                  className="tree-expand-button"
-                  onClick={() =>
-                    toggleGroup(
-                      group.id,
-                    )
-                  }
-                >
-                  {groupExpanded
-                    ? "⌄"
-                    : "›"}
-                </button>
-
-                <div className="organization-group-icon">
-                  G
-                </div>
-
-                <div className="organization-node-info">
-
-                  <strong>
-                    {group.name}
-                  </strong>
-
-                  <span>
-                    Code {group.code}
-                  </span>
-
-                </div>
-
-                <span className="organization-badge">
-                  GROUP
-                </span>
-
-                {!group.is_active && (
-                  <span className="inactive-badge">
-                    INACTIVE
-                  </span>
-                )}
-
-                <div className="organization-node-actions">
+                <div className="organization-group-header">
 
                   <button
                     type="button"
+                    className="tree-expand-button"
                     onClick={() =>
-                      openEditUnit(
-                        group,
-                      )
-                    }
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openAddUnit(
+                      toggleGroup(
                         group.id,
                       )
                     }
                   >
-                    + Unit
+                    {groupExpanded
+                      ? "⌄"
+                      : "›"}
                   </button>
 
-                  <button
-                    type="button"
-                    className={
-                      group.is_active
-                        ? "danger-action"
-                        : "success-action"
-                    }
-                    onClick={() =>
-                      toggleOrganization(
-                        group,
-                      )
-                    }
-                  >
-                    {group.is_active
-                      ? "Deactivate"
-                      : "Activate"}
-                  </button>
+
+                  <div className="organization-group-icon">
+                    G
+                  </div>
+
+
+                  <div className="organization-node-info">
+
+                    <strong>
+                      {group.name}
+                    </strong>
+
+                    <span>
+                      Code {group.code}
+                    </span>
+
+                  </div>
+
+
+                  <span className="organization-badge">
+                    GROUP
+                  </span>
+
+
+                  {!group.is_active && (
+                    <span className="inactive-badge">
+                      INACTIVE
+                    </span>
+                  )}
+
+
+                  <div className="organization-node-actions">
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openEditUnit(
+                          group,
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
+
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openAddUnit(
+                          group.id,
+                        )
+                      }
+                    >
+                      + Unit
+                    </button>
+
+
+                    <button
+                      type="button"
+                      className={
+                        group.is_active
+                          ? "danger-action"
+                          : "success-action"
+                      }
+                      onClick={() =>
+                        toggleOrganization(
+                          group,
+                        )
+                      }
+                    >
+                      {group.is_active
+                        ? "Deactivate"
+                        : "Activate"}
+                    </button>
+
+                  </div>
 
                 </div>
 
-              </div>
+
+                {groupExpanded && (
+
+                  <div className="organization-children">
+
+                    {groupUnits.length === 0 && (
+
+                      <div className="organization-empty">
+                        No units in this group.
+                      </div>
+
+                    )}
 
 
-              {groupExpanded && (
+                    {groupUnits.map(
+                      (unit) => {
 
-                <div className="organization-children">
+                        const unitLines =
+                          lines[unit.id] ??
+                          [];
 
-                  {groupUnits.length === 0 && (
-                    <div className="organization-empty">
-                      No units in this group.
-                    </div>
-                  )}
+                        const unitExpanded =
+                          expandedUnits.includes(
+                            unit.id,
+                          );
 
-                  {groupUnits.map(
-                    (unit) => {
 
-                      const unitLines =
-                        lines[unit.id] ??
-                        [];
+                        return (
 
-                      const unitExpanded =
-                        expandedUnits.includes(
-                          unit.id,
-                        );
+                          <div
+                            className={`organization-unit ${
+                              !unit.is_active
+                                ? "inactive"
+                                : ""
+                            }`}
+                            key={unit.id}
+                          >
 
-                      return (
-                        <div
-                          className={`organization-unit ${
-                            !unit.is_active
-                              ? "inactive"
-                              : ""
-                          }`}
-                          key={unit.id}
-                        >
-
-                          <div className="organization-unit-header">
-
-                            <button
-                              type="button"
-                              className="tree-expand-button"
-                              onClick={() =>
-                                toggleUnit(
-                                  unit.id,
-                                )
-                              }
-                            >
-                              {unitExpanded
-                                ? "⌄"
-                                : "›"}
-                            </button>
-
-                            <div className="organization-unit-icon">
-                              U
-                            </div>
-
-                            <div className="organization-node-info">
-
-                              <strong>
-                                {unit.name}
-                              </strong>
-
-                              <span>
-                                Code {unit.code}
-                              </span>
-
-                            </div>
-
-                            <span className="organization-badge unit">
-                              UNIT
-                            </span>
-
-                            {!unit.is_active && (
-                              <span className="inactive-badge">
-                                INACTIVE
-                              </span>
-                            )}
-
-                            <div className="organization-node-actions">
+                            <div className="organization-unit-header">
 
                               <button
                                 type="button"
+                                className="tree-expand-button"
                                 onClick={() =>
-                                  openEditUnit(
-                                    unit,
-                                  )
-                                }
-                              >
-                                Edit
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  openAddLine(
+                                  toggleUnit(
                                     unit.id,
                                   )
                                 }
                               >
-                                + Line
+                                {unitExpanded
+                                  ? "⌄"
+                                  : "›"}
                               </button>
 
-                              <button
-                                type="button"
-                                className={
-                                  unit.is_active
-                                    ? "danger-action"
-                                    : "success-action"
-                                }
-                                onClick={() =>
-                                  toggleOrganization(
-                                    unit,
-                                  )
-                                }
-                              >
-                                {unit.is_active
-                                  ? "Deactivate"
-                                  : "Activate"}
-                              </button>
+
+                              <div className="organization-unit-icon">
+                                U
+                              </div>
+
+
+                              <div className="organization-node-info">
+
+                                <strong>
+                                  {unit.name}
+                                </strong>
+
+                                <span>
+                                  Code {unit.code}
+                                </span>
+
+                              </div>
+
+
+                              <span className="organization-badge unit">
+                                UNIT
+                              </span>
+
+
+                              {!unit.is_active && (
+                                <span className="inactive-badge">
+                                  INACTIVE
+                                </span>
+                              )}
+
+
+                              <div className="organization-node-actions">
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openEditUnit(
+                                      unit,
+                                    )
+                                  }
+                                >
+                                  Edit
+                                </button>
+
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openAddLine(
+                                      unit.id,
+                                    )
+                                  }
+                                >
+                                  + Line
+                                </button>
+
+
+                                <button
+                                  type="button"
+                                  className={
+                                    unit.is_active
+                                      ? "danger-action"
+                                      : "success-action"
+                                  }
+                                  onClick={() =>
+                                    toggleOrganization(
+                                      unit,
+                                    )
+                                  }
+                                >
+                                  {unit.is_active
+                                    ? "Deactivate"
+                                    : "Activate"}
+                                </button>
+
+                              </div>
 
                             </div>
+
+
+                            {unitExpanded && (
+
+                              <div className="line-list">
+
+                                {unitLines.length === 0 ? (
+
+                                  <div className="organization-empty">
+                                    No lines found.
+                                  </div>
+
+                                ) : (
+
+                                  unitLines.map(
+                                    (line) => (
+
+                                      <div
+                                        className={`line-row ${
+                                          !line.is_active
+                                            ? "inactive"
+                                            : ""
+                                        }`}
+                                        key={line.id}
+                                      >
+
+                                        <div className="line-number">
+                                          {line.line_number}
+                                        </div>
+
+
+                                        <div className="line-name">
+                                          {line.name}
+                                        </div>
+
+
+                                        {!line.is_active && (
+                                          <span className="inactive-badge">
+                                            INACTIVE
+                                          </span>
+                                        )}
+
+
+                                        <div className="line-actions">
+
+                                          {/* VIEW LINE */}
+                                          <button
+                                            type="button"
+                                            className="line-view-button"
+                                            onClick={() =>
+                                              navigate(
+                                                `/lines/${line.id}`,
+                                              )
+                                            }
+                                          >
+                                            View
+                                          </button>
+
+
+                                          {/* EDIT LINE */}
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              openEditLine(
+                                                line,
+                                              )
+                                            }
+                                          >
+                                            Edit
+                                          </button>
+
+
+                                          {/* ACTIVATE / DEACTIVATE */}
+                                          <button
+                                            type="button"
+                                            className={
+                                              line.is_active
+                                                ? "danger-action"
+                                                : "success-action"
+                                            }
+                                            onClick={() =>
+                                              toggleLine(
+                                                line,
+                                              )
+                                            }
+                                          >
+                                            {line.is_active
+                                              ? "Deactivate"
+                                              : "Activate"}
+                                          </button>
+
+                                        </div>
+
+                                      </div>
+
+                                    ),
+                                  )
+
+                                )}
+
+                              </div>
+
+                            )}
 
                           </div>
 
+                        );
 
-                          {unitExpanded && (
+                      },
+                    )}
 
-                            <div className="line-list">
+                  </div>
 
-                              {unitLines.length === 0 ? (
-                                <div className="organization-empty">
-                                  No lines found.
-                                </div>
-                              ) : (
+                )}
 
-                                unitLines.map(
-                                  (line) => (
+              </section>
 
-                                    <div
-                                      className={`line-row ${
-                                        !line.is_active
-                                          ? "inactive"
-                                          : ""
-                                      }`}
-                                      key={line.id}
-                                    >
+            );
 
-                                      <div className="line-number">
-                                        {line.line_number}
-                                      </div>
+          })}
 
-                                      <div className="line-name">
-                                        {line.name}
-                                      </div>
-
-                                      {!line.is_active && (
-                                        <span className="inactive-badge">
-                                          INACTIVE
-                                        </span>
-                                      )}
-
-                                      <div className="line-actions">
-
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            openEditLine(
-                                              line,
-                                            )
-                                          }
-                                        >
-                                          Edit
-                                        </button>
-
-                                        <button
-                                          type="button"
-                                          className={
-                                            line.is_active
-                                              ? "danger-action"
-                                              : "success-action"
-                                          }
-                                          onClick={() =>
-                                            toggleLine(
-                                              line,
-                                            )
-                                          }
-                                        >
-                                          {line.is_active
-                                            ? "Deactivate"
-                                            : "Activate"}
-                                        </button>
-
-                                      </div>
-
-                                    </div>
-
-                                  ),
-                                )
-
-                              )}
-
-                            </div>
-
-                          )}
-
-                        </div>
-                      );
-                    },
-                  )}
-
-                </div>
-
-              )}
-
-            </section>
-          );
-        })}
-
-      </div>
+        </div>
 
 
-      {/* ======================================================
-          ORGANIZATION MODAL
-          ====================================================== */}
+        {/* ======================================================
+            ORGANIZATION MODAL
+            ====================================================== */}
 
-      {showUnitForm && (
-
-        <div
-          className="organization-modal-overlay"
-          onClick={() =>
-            setShowUnitForm(false)
-          }
-        >
+        {showUnitForm && (
 
           <div
-            className="organization-modal"
-            onClick={(event) =>
-              event.stopPropagation()
+            className="organization-modal-overlay"
+            onClick={() =>
+              setShowUnitForm(false)
             }
           >
 
-            <div className="organization-modal-header">
+            <div
+              className="organization-modal"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
 
-              <div>
+              <div className="organization-modal-header">
 
-                <span>
-                  {editingUnit
-                    ? "Edit organization"
-                    : "New organization"}
-                </span>
+                <div>
 
-                <h2>
-                  {editingUnit
-                    ? "Update"
-                    : "Create"}
-                </h2>
+                  <span>
+                    {editingUnit
+                      ? "Edit organization"
+                      : "New organization"}
+                  </span>
+
+                  <h2>
+                    {editingUnit
+                      ? "Update"
+                      : "Create"}
+                  </h2>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowUnitForm(false)
+                  }
+                >
+                  ×
+                </button>
 
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setShowUnitForm(false)
+
+              <form
+                onSubmit={
+                  handleUnitSubmit
                 }
+                className="organization-form"
               >
-                ×
-              </button>
-
-            </div>
-
-
-            <form
-              onSubmit={
-                handleUnitSubmit
-              }
-              className="organization-form"
-            >
-
-              <label>
-                Name
-
-                <input
-                  value={
-                    unitForm.name
-                  }
-                  onChange={(event) =>
-                    setUnitForm(
-                      (previous) => ({
-                        ...previous,
-                        name:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="Group1 / Unit1"
-                />
-
-              </label>
-
-
-              <label>
-                Code
-
-                <input
-                  value={
-                    unitForm.code
-                  }
-                  onChange={(event) =>
-                    setUnitForm(
-                      (previous) => ({
-                        ...previous,
-                        code:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="100 / 101"
-                />
-
-              </label>
-
-
-              <label>
-                Type
-
-                <select
-                  value={
-                    unitForm.unit_type
-                  }
-                  onChange={(event) =>
-                    setUnitForm(
-                      (previous) => ({
-                        ...previous,
-                        unit_type:
-                          event.target.value as
-                            "GROUP" |
-                            "UNIT",
-                        parent_id:
-                          event.target.value ===
-                          "GROUP"
-                            ? null
-                            : previous.parent_id,
-                      }),
-                    )
-                  }
-                  disabled={
-                    editingUnit !== null
-                  }
-                >
-                  <option value="GROUP">
-                    Group
-                  </option>
-
-                  <option value="UNIT">
-                    Unit
-                  </option>
-                </select>
-
-              </label>
-
-
-              {unitForm.unit_type ===
-                "UNIT" && (
 
                 <label>
-                  Parent Group
+                  Name
 
-                  <select
+                  <input
                     value={
-                      unitForm.parent_id ??
-                      ""
+                      unitForm.name
                     }
                     onChange={(event) =>
                       setUnitForm(
                         (previous) => ({
                           ...previous,
-                          parent_id:
-                            event.target.value
-                              ? Number(
-                                  event.target.value,
-                                )
-                              : null,
+                          name:
+                            event.target.value,
                         }),
                       )
                     }
+                    placeholder="Group1 / Unit1"
+                  />
+
+                </label>
+
+
+                <label>
+                  Code
+
+                  <input
+                    value={
+                      unitForm.code
+                    }
+                    onChange={(event) =>
+                      setUnitForm(
+                        (previous) => ({
+                          ...previous,
+                          code:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    placeholder="100 / 101"
+                  />
+
+                </label>
+
+
+                <label>
+                  Type
+
+                  <select
+                    value={
+                      unitForm.unit_type
+                    }
+                    onChange={(event) =>
+                      setUnitForm(
+                        (previous) => ({
+                          ...previous,
+                          unit_type:
+                            event.target.value as
+                              | "GROUP"
+                              | "UNIT",
+                          parent_id:
+                            event.target.value ===
+                            "GROUP"
+                              ? null
+                              : previous.parent_id,
+                        }),
+                      )
+                    }
+                    disabled={
+                      editingUnit !== null
+                    }
                   >
 
-                    <option value="">
-                      Select group
+                    <option value="GROUP">
+                      Group
                     </option>
 
-                    {groups.map(
-                      (group) => (
-
-                        <option
-                          key={group.id}
-                          value={group.id}
-                        >
-                          {group.name} —{" "}
-                          {group.code}
-                        </option>
-
-                      ),
-                    )}
+                    <option value="UNIT">
+                      Unit
+                    </option>
 
                   </select>
 
                 </label>
 
-              )}
+
+                {unitForm.unit_type ===
+                  "UNIT" && (
+
+                  <label>
+                    Parent Group
+
+                    <select
+                      value={
+                        unitForm.parent_id ??
+                        ""
+                      }
+                      onChange={(event) =>
+                        setUnitForm(
+                          (previous) => ({
+                            ...previous,
+                            parent_id:
+                              event.target.value
+                                ? Number(
+                                    event.target.value,
+                                  )
+                                : null,
+                          }),
+                        )
+                      }
+                    >
+
+                      <option value="">
+                        Select group
+                      </option>
 
 
-              <div className="organization-form-actions">
+                      {groups.map(
+                        (group) => (
 
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={() =>
-                    setShowUnitForm(
-                      false,
-                    )
-                  }
-                >
-                  Cancel
-                </button>
+                          <option
+                            key={group.id}
+                            value={group.id}
+                          >
+                            {group.name} —{" "}
+                            {group.code}
+                          </option>
 
-                <button
-                  type="submit"
-                  className="organization-primary-button"
-                  disabled={saving}
-                >
-                  {saving
-                    ? "Saving..."
-                    : editingUnit
-                      ? "Save Changes"
-                      : "Create"}
-                </button>
+                        ),
+                      )}
 
-              </div>
+                    </select>
 
-            </form>
+                  </label>
 
-          </div>
-
-        </div>
-
-      )}
+                )}
 
 
-      {/* ======================================================
-          LINE MODAL
-          ====================================================== */}
+                <div className="organization-form-actions">
 
-      {showLineForm && (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() =>
+                      setShowUnitForm(
+                        false,
+                      )
+                    }
+                  >
+                    Cancel
+                  </button>
 
-        <div
-          className="organization-modal-overlay"
-          onClick={() =>
-            setShowLineForm(false)
-          }
-        >
 
-          <div
-            className="organization-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
+                  <button
+                    type="submit"
+                    className="organization-primary-button"
+                    disabled={saving}
+                  >
+                    {saving
+                      ? "Saving..."
+                      : editingUnit
+                        ? "Save Changes"
+                        : "Create"}
+                  </button>
 
-            <div className="organization-modal-header">
+                </div>
 
-              <div>
-
-                <span>
-                  {editingLine
-                    ? "Edit production line"
-                    : "New production line"}
-                </span>
-
-                <h2>
-                  {editingLine
-                    ? "Update Line"
-                    : "Add Line"}
-                </h2>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowLineForm(false)
-                }
-              >
-                ×
-              </button>
+              </form>
 
             </div>
 
+          </div>
 
-            <form
-              onSubmit={
-                handleLineSubmit
+        )}
+
+
+        {/* ======================================================
+            LINE MODAL
+            ====================================================== */}
+
+        {showLineForm && (
+
+          <div
+            className="organization-modal-overlay"
+            onClick={() =>
+              setShowLineForm(false)
+            }
+          >
+
+            <div
+              className="organization-modal"
+              onClick={(event) =>
+                event.stopPropagation()
               }
-              className="organization-form"
             >
 
-              <label>
-                Line Number
+              <div className="organization-modal-header">
 
-                <input
-                  type="number"
-                  min="1"
-                  value={
-                    lineForm.line_number
-                  }
-                  onChange={(event) =>
-                    setLineForm(
-                      (previous) => ({
-                        ...previous,
-                        line_number:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="e.g. 126"
-                />
+                <div>
 
-              </label>
+                  <span>
+                    {editingLine
+                      ? "Edit production line"
+                      : "New production line"}
+                  </span>
 
+                  <h2>
+                    {editingLine
+                      ? "Update Line"
+                      : "Add Line"}
+                  </h2>
 
-              <label>
-                Line Name
+                </div>
 
-                <input
-                  value={
-                    lineForm.name
-                  }
-                  onChange={(event) =>
-                    setLineForm(
-                      (previous) => ({
-                        ...previous,
-                        name:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="Line 126"
-                />
-
-              </label>
-
-
-              <div className="organization-form-actions">
 
                 <button
                   type="button"
-                  className="secondary-button"
                   onClick={() =>
-                    setShowLineForm(
-                      false,
-                    )
+                    setShowLineForm(false)
                   }
                 >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="organization-primary-button"
-                  disabled={saving}
-                >
-                  {saving
-                    ? "Saving..."
-                    : editingLine
-                      ? "Save Changes"
-                      : "Create Line"}
+                  ×
                 </button>
 
               </div>
 
-            </form>
+
+              <form
+                onSubmit={
+                  handleLineSubmit
+                }
+                className="organization-form"
+              >
+
+                <label>
+                  Line Number
+
+                  <input
+                    type="number"
+                    min="1"
+                    value={
+                      lineForm.line_number
+                    }
+                    onChange={(event) =>
+                      setLineForm(
+                        (previous) => ({
+                          ...previous,
+                          line_number:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    placeholder="e.g. 126"
+                  />
+
+                </label>
+
+
+                <label>
+                  Line Name
+
+                  <input
+                    value={
+                      lineForm.name
+                    }
+                    onChange={(event) =>
+                      setLineForm(
+                        (previous) => ({
+                          ...previous,
+                          name:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    placeholder="Line 126"
+                  />
+
+                </label>
+
+
+                <div className="organization-form-actions">
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() =>
+                      setShowLineForm(
+                        false,
+                      )
+                    }
+                  >
+                    Cancel
+                  </button>
+
+
+                  <button
+                    type="submit"
+                    className="organization-primary-button"
+                    disabled={saving}
+                  >
+                    {saving
+                      ? "Saving..."
+                      : editingLine
+                        ? "Save Changes"
+                        : "Create Line"}
+                  </button>
+
+                </div>
+
+              </form>
+
+            </div>
 
           </div>
 
-        </div>
-
-      )}
+        )}
 
       </div>
+
     </DashboardLayout>
   );
 }
@@ -12647,7 +16243,7 @@ export default Organization;
 
 
 ====================================================================================================
-FILE 35: frontend/src\pages\users\User.css
+FILE 41: frontend/src\pages\users\User.css
 ====================================================================================================
 
 /* ============================================================
@@ -15503,7 +19099,7 @@ select:focus-visible {
 
 
 ====================================================================================================
-FILE 36: frontend/src\pages\users\UserManagement.tsx
+FILE 42: frontend/src\pages\users\UserManagement.tsx
 ====================================================================================================
 
 import { useNavigate } from "react-router-dom";
@@ -15610,7 +19206,7 @@ export default UserManagement;
 
 
 ====================================================================================================
-FILE 37: frontend/src\pages\users\Users.tsx
+FILE 43: frontend/src\pages\users\Users.tsx
 ====================================================================================================
 
 import {
@@ -18378,7 +21974,7 @@ export default Users;
 
 
 ====================================================================================================
-FILE 38: frontend/src\routes\AppRoutes.tsx
+FILE 44: frontend/src\routes\AppRoutes.tsx
 ====================================================================================================
 
 import {
@@ -18391,6 +21987,7 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Users from "../pages/users/Users";
 import Organization from "../pages/organization/Organization";
+import LineDetails from "../pages/lines/LineDetails";
 import ComingSoon from "../pages/common/ComingSoon";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -18436,6 +22033,16 @@ function AppRoutes() {
           }
         />
 
+        {/* Line Details */}
+        <Route
+          path="/lines/:lineId"
+          element={
+            <ProtectedRoute>
+              <LineDetails />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Coming Soon */}
         <Route
           path="/coming-soon"
@@ -18465,7 +22072,7 @@ export default AppRoutes;
 
 
 ====================================================================================================
-FILE 39: frontend/src\routes\ProtectedRoute.tsx
+FILE 45: frontend/src\routes\ProtectedRoute.tsx
 ====================================================================================================
 
 import type { ReactNode } from "react";
@@ -18504,10 +22111,11 @@ export default ProtectedRoute;
 
 
 ====================================================================================================
-FILE 40: frontend/src\services\api.ts
+FILE 46: frontend/src\services\api.ts
 ====================================================================================================
 
 import axios from "axios";
+
 import {
   getAccessToken,
   getRefreshToken,
@@ -18522,6 +22130,9 @@ const api = axios.create({
   },
 });
 
+/*
+ * Add access token to normal authenticated requests.
+ */
 api.interceptors.request.use((config) => {
   const accessToken = getAccessToken();
 
@@ -18532,12 +22143,37 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+/*
+ * Response interceptor
+ */
 api.interceptors.response.use(
   (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
 
+    /*
+     * IMPORTANT:
+     *
+     * Login itself is expected to return 401 when the
+     * Employee ID or password is wrong.
+     *
+     * DO NOT redirect/reload the page in that case.
+     *
+     * Let Login.tsx handle the error and show the popup.
+     */
+    const requestUrl = originalRequest?.url || "";
+
+    if (
+      requestUrl.includes("/auth/login") ||
+      requestUrl.endsWith("/auth/login")
+    ) {
+      return Promise.reject(error);
+    }
+
+    /*
+     * Only handle 401 errors for authenticated requests.
+     */
     if (
       error.response?.status !== 401 ||
       originalRequest?._retry
@@ -18545,14 +22181,29 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    /*
+     * Get refresh token.
+     */
     const refreshToken = getRefreshToken();
 
+    /*
+     * No refresh token means the user is not authenticated.
+     *
+     * Do NOT redirect if this is already the login page/request.
+     */
     if (!refreshToken) {
       clearTokens();
-      window.location.href = "/";
+
+      if (window.location.pathname !== "/") {
+        window.location.href = "/";
+      }
+
       return Promise.reject(error);
     }
 
+    /*
+     * Prevent infinite retry loop.
+     */
     originalRequest._retry = true;
 
     try {
@@ -18568,20 +22219,32 @@ api.interceptors.response.use(
         refresh_token,
       } = response.data;
 
+      /*
+       * Save new tokens.
+       */
       setTokens(
         access_token,
         refresh_token
       );
 
+      /*
+       * Retry original request with new token.
+       */
       originalRequest.headers.Authorization =
         `Bearer ${access_token}`;
 
       return api(originalRequest);
-    } catch {
+    } catch (refreshError) {
+      /*
+       * Refresh failed.
+       */
       clearTokens();
-      window.location.href = "/";
 
-      return Promise.reject(error);
+      if (window.location.pathname !== "/") {
+        window.location.href = "/";
+      }
+
+      return Promise.reject(refreshError);
     }
   }
 );
@@ -18590,7 +22253,7 @@ export default api;
 
 
 ====================================================================================================
-FILE 41: frontend/src\services\authService.ts
+FILE 47: frontend/src\services\authService.ts
 ====================================================================================================
 
 import api from "./api";
@@ -18640,7 +22303,7 @@ export async function logout(
 
 
 ====================================================================================================
-FILE 42: frontend/src\services\lineService.ts
+FILE 48: frontend/src\services\lineService.ts
 ====================================================================================================
 
 import api from "./api";
@@ -18694,7 +22357,7 @@ export async function updateLine(
 
 
 ====================================================================================================
-FILE 43: frontend/src\services\organizationService.ts
+FILE 49: frontend/src\services\organizationService.ts
 ====================================================================================================
 
 import api from "./api";
@@ -18819,7 +22482,7 @@ export async function updateLine(
 
 
 ====================================================================================================
-FILE 44: frontend/src\services\userService.ts
+FILE 50: frontend/src\services\userService.ts
 ====================================================================================================
 
 import api from "./api";
@@ -18864,7 +22527,7 @@ export async function updateUser(
 
 
 ====================================================================================================
-FILE 45: frontend/src\types\auth.ts
+FILE 51: frontend/src\types\auth.ts
 ====================================================================================================
 
 export interface LoginRequest {
@@ -18878,9 +22541,20 @@ export interface TokenResponse {
   token_type: string;
 }
 
+export interface User {
+  employee_id: number;
+  username: string;
+  full_name: string;
+  email?: string | null;
+  role_id: number;
+  organization_unit_id?: number | null;
+  designation?: string | null;
+  is_active: boolean;
+}
+
 
 ====================================================================================================
-FILE 46: frontend/src\types\line.ts
+FILE 52: frontend/src\types\line.ts
 ====================================================================================================
 
 export interface Line {
@@ -18909,7 +22583,7 @@ export interface LineUpdate {
 
 
 ====================================================================================================
-FILE 47: frontend/src\types\organization.ts
+FILE 53: frontend/src\types\organization.ts
 ====================================================================================================
 
 export interface OrganizationUnit {
@@ -18965,7 +22639,7 @@ export interface LineUpdate {
 
 
 ====================================================================================================
-FILE 48: frontend/src\types\user.ts
+FILE 54: frontend/src\types\user.ts
 ====================================================================================================
 
 // ============================================================
@@ -19015,7 +22689,7 @@ export interface UserUpdate {
 
 
 ====================================================================================================
-FILE 49: frontend/src\utils\storage.ts
+FILE 55: frontend/src\utils\storage.ts
 ====================================================================================================
 
 const ACCESS_TOKEN_KEY = "sfms_access_token";
@@ -19060,7 +22734,7 @@ export function clearTokens(): void {
 
 
 ====================================================================================================
-FILE 50: frontend/tsconfig.app.json
+FILE 56: frontend/tsconfig.app.json
 ====================================================================================================
 
 {
@@ -19093,7 +22767,7 @@ FILE 50: frontend/tsconfig.app.json
 
 
 ====================================================================================================
-FILE 51: frontend/tsconfig.json
+FILE 57: frontend/tsconfig.json
 ====================================================================================================
 
 {
@@ -19107,7 +22781,7 @@ FILE 51: frontend/tsconfig.json
 
 
 ====================================================================================================
-FILE 52: frontend/tsconfig.node.json
+FILE 58: frontend/tsconfig.node.json
 ====================================================================================================
 
 {
@@ -19137,7 +22811,7 @@ FILE 52: frontend/tsconfig.node.json
 
 
 ====================================================================================================
-FILE 53: frontend/vite.config.ts
+FILE 59: frontend/vite.config.ts
 ====================================================================================================
 
 import react from '@vitejs/plugin-react'

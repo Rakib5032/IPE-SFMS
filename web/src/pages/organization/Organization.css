@@ -804,3 +804,28 @@
     padding-left: 16px;
   }
 }
+
+
+.line-view-button {
+  border: 1px solid #d0d5dd;
+  background: #ffffff;
+  color: #344054;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.line-view-button:hover {
+  background: #f8fafc;
+  border-color: #98a2b3;
+}
+
+.line-view-button:active {
+  transform: translateY(1px);
+}

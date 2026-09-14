@@ -21,13 +21,13 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import "./Organization.css";
 
 
-
 type UnitForm = {
   name: string;
   code: string;
   unit_type: "GROUP" | "UNIT";
   parent_id: number | null;
 };
+
 
 type LineForm = {
   line_number: string;
@@ -121,6 +121,7 @@ function Organization() {
       setLoading(false);
 
     }
+
   }
 
 
@@ -162,6 +163,7 @@ function Organization() {
         (a, b) =>
           a.code.localeCompare(b.code),
       );
+
   }
 
 
@@ -181,6 +183,7 @@ function Organization() {
             )
           : [...previous, groupId],
     );
+
   }
 
 
@@ -205,7 +208,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     setExpandedUnits(
       (previous) => [
@@ -213,6 +218,7 @@ function Organization() {
         unitId,
       ],
     );
+
 
     if (!lines[unitId]) {
 
@@ -236,7 +242,9 @@ function Organization() {
         );
 
       }
+
     }
+
   }
 
 
@@ -245,8 +253,10 @@ function Organization() {
   // ==========================================================
 
   function clearMessages() {
+
     setError("");
     setMessage("");
+
   }
 
 
@@ -268,6 +278,7 @@ function Organization() {
     });
 
     setShowUnitForm(true);
+
   }
 
 
@@ -291,6 +302,7 @@ function Organization() {
     });
 
     setShowUnitForm(true);
+
   }
 
 
@@ -316,6 +328,7 @@ function Organization() {
     });
 
     setShowUnitForm(true);
+
   }
 
 
@@ -338,7 +351,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     if (!unitForm.code.trim()) {
 
@@ -347,7 +362,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     try {
 
@@ -386,6 +403,7 @@ function Organization() {
         setMessage(
           "Organization created successfully.",
         );
+
       }
 
       setShowUnitForm(false);
@@ -404,6 +422,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -451,6 +470,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -474,6 +494,7 @@ function Organization() {
     });
 
     setShowLineForm(true);
+
   }
 
 
@@ -500,6 +521,7 @@ function Organization() {
     });
 
     setShowLineForm(true);
+
   }
 
 
@@ -518,6 +540,7 @@ function Organization() {
     const lineNumber =
       Number(lineForm.line_number);
 
+
     if (
       !Number.isInteger(lineNumber) ||
       lineNumber <= 0
@@ -528,7 +551,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     if (!lineForm.name.trim()) {
 
@@ -537,7 +562,9 @@ function Organization() {
       );
 
       return;
+
     }
+
 
     try {
 
@@ -567,7 +594,9 @@ function Organization() {
           );
 
           return;
+
         }
+
 
         await createLine(
           selectedUnitId,
@@ -584,9 +613,12 @@ function Organization() {
         setMessage(
           "Line created successfully.",
         );
+
       }
 
+
       setShowLineForm(false);
+
 
       if (selectedUnitId) {
 
@@ -602,6 +634,7 @@ function Organization() {
               result,
           }),
         );
+
       }
 
     } catch (err: any) {
@@ -616,6 +649,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -649,6 +683,7 @@ function Organization() {
         }.`,
       );
 
+
       const result =
         await getUnitLines(
           line.organization_unit_id,
@@ -674,6 +709,7 @@ function Organization() {
       setSaving(false);
 
     }
+
   }
 
 
@@ -685,13 +721,18 @@ function Organization() {
 
     return (
       <DashboardLayout>
+
         <div className="organization-page">
+
           <div className="organization-loading">
             Loading organization structure...
           </div>
+
         </div>
+
       </DashboardLayout>
     );
+
   }
 
 
@@ -701,803 +742,886 @@ function Organization() {
 
   return (
     <DashboardLayout>
+
       <div className="organization-page">
 
         <button
           type="button"
           className="secondary-button organization-back-button"
-          onClick={() => navigate("/dashboard")}
+          onClick={() =>
+            navigate("/dashboard")
+          }
         >
           ← Back to Dashboard
         </button>
 
+
         <div className="organization-header">
 
-        <div>
+          <div>
 
-          <div className="organization-eyebrow">
-            SFMS • Administration
+            <div className="organization-eyebrow">
+              SFMS • Administration
+            </div>
+
+            <h1>
+              Organization Management
+            </h1>
+
+            <p>
+              Manage groups, units and production
+              lines from one place.
+            </p>
+
           </div>
 
-          <h1>
-            Organization Management
-          </h1>
 
-          <p>
-            Manage groups, units and production
-            lines from one place.
-          </p>
+          <button
+            type="button"
+            className="organization-primary-button"
+            onClick={openAddGroup}
+          >
+            + Add Group
+          </button>
 
         </div>
 
-        <button
-          type="button"
-          className="organization-primary-button"
-          onClick={openAddGroup}
-        >
-          + Add Group
-        </button>
 
-      </div>
+        {message && (
+          <div className="organization-message">
+            ✓ {message}
+          </div>
+        )}
 
 
-      {message && (
-        <div className="organization-message">
-          ✓ {message}
+        {error && (
+          <div className="organization-error">
+            {error}
+          </div>
+        )}
+
+
+        <div className="organization-summary">
+
+          <div className="organization-summary-card">
+
+            <span>
+              Groups
+            </span>
+
+            <strong>
+              {groups.length}
+            </strong>
+
+          </div>
+
+
+          <div className="organization-summary-card">
+
+            <span>
+              Units
+            </span>
+
+            <strong>
+              {
+                organizations.filter(
+                  (item) =>
+                    item.unit_type === "UNIT",
+                ).length
+              }
+            </strong>
+
+          </div>
+
+
+          <div className="organization-summary-card">
+
+            <span>
+              Lines Loaded
+            </span>
+
+            <strong>
+              {
+                Object.values(lines)
+                  .flat()
+                  .length
+              }
+            </strong>
+
+          </div>
+
+
+          <div className="organization-summary-card">
+
+            <span>
+              Active Units
+            </span>
+
+            <strong>
+              {
+                organizations.filter(
+                  (item) =>
+                    item.is_active,
+                ).length
+              }
+            </strong>
+
+          </div>
+
         </div>
-      )}
 
 
-      {error && (
-        <div className="organization-error">
-          {error}
-        </div>
-      )}
+        <div className="organization-tree">
+
+          {groups.map((group) => {
+
+            const groupUnits =
+              getGroupUnits(group.id);
+
+            const groupExpanded =
+              expandedGroups.includes(
+                group.id,
+              );
 
 
-      <div className="organization-summary">
+            return (
 
-        <div className="organization-summary-card">
-          <span>Groups</span>
-          <strong>
-            {groups.length}
-          </strong>
-        </div>
+              <section
+                className={`organization-group ${
+                  !group.is_active
+                    ? "inactive"
+                    : ""
+                }`}
+                key={group.id}
+              >
 
-        <div className="organization-summary-card">
-          <span>Units</span>
-          <strong>
-            {
-              organizations.filter(
-                (item) =>
-                  item.unit_type === "UNIT",
-              ).length
-            }
-          </strong>
-        </div>
-
-        <div className="organization-summary-card">
-          <span>Lines Loaded</span>
-          <strong>
-            {
-              Object.values(lines)
-                .flat()
-                .length
-            }
-          </strong>
-        </div>
-
-        <div className="organization-summary-card">
-          <span>Active Units</span>
-          <strong>
-            {
-              organizations.filter(
-                (item) =>
-                  item.is_active,
-              ).length
-            }
-          </strong>
-        </div>
-
-      </div>
-
-
-      <div className="organization-tree">
-
-        {groups.map((group) => {
-
-          const groupUnits =
-            getGroupUnits(group.id);
-
-          const groupExpanded =
-            expandedGroups.includes(
-              group.id,
-            );
-
-          return (
-            <section
-              className={`organization-group ${
-                !group.is_active
-                  ? "inactive"
-                  : ""
-              }`}
-              key={group.id}
-            >
-
-              <div className="organization-group-header">
-
-                <button
-                  type="button"
-                  className="tree-expand-button"
-                  onClick={() =>
-                    toggleGroup(
-                      group.id,
-                    )
-                  }
-                >
-                  {groupExpanded
-                    ? "⌄"
-                    : "›"}
-                </button>
-
-                <div className="organization-group-icon">
-                  G
-                </div>
-
-                <div className="organization-node-info">
-
-                  <strong>
-                    {group.name}
-                  </strong>
-
-                  <span>
-                    Code {group.code}
-                  </span>
-
-                </div>
-
-                <span className="organization-badge">
-                  GROUP
-                </span>
-
-                {!group.is_active && (
-                  <span className="inactive-badge">
-                    INACTIVE
-                  </span>
-                )}
-
-                <div className="organization-node-actions">
+                <div className="organization-group-header">
 
                   <button
                     type="button"
+                    className="tree-expand-button"
                     onClick={() =>
-                      openEditUnit(
-                        group,
-                      )
-                    }
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openAddUnit(
+                      toggleGroup(
                         group.id,
                       )
                     }
                   >
-                    + Unit
+                    {groupExpanded
+                      ? "⌄"
+                      : "›"}
                   </button>
 
-                  <button
-                    type="button"
-                    className={
-                      group.is_active
-                        ? "danger-action"
-                        : "success-action"
-                    }
-                    onClick={() =>
-                      toggleOrganization(
-                        group,
-                      )
-                    }
-                  >
-                    {group.is_active
-                      ? "Deactivate"
-                      : "Activate"}
-                  </button>
+
+                  <div className="organization-group-icon">
+                    G
+                  </div>
+
+
+                  <div className="organization-node-info">
+
+                    <strong>
+                      {group.name}
+                    </strong>
+
+                    <span>
+                      Code {group.code}
+                    </span>
+
+                  </div>
+
+
+                  <span className="organization-badge">
+                    GROUP
+                  </span>
+
+
+                  {!group.is_active && (
+                    <span className="inactive-badge">
+                      INACTIVE
+                    </span>
+                  )}
+
+
+                  <div className="organization-node-actions">
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openEditUnit(
+                          group,
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
+
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openAddUnit(
+                          group.id,
+                        )
+                      }
+                    >
+                      + Unit
+                    </button>
+
+
+                    <button
+                      type="button"
+                      className={
+                        group.is_active
+                          ? "danger-action"
+                          : "success-action"
+                      }
+                      onClick={() =>
+                        toggleOrganization(
+                          group,
+                        )
+                      }
+                    >
+                      {group.is_active
+                        ? "Deactivate"
+                        : "Activate"}
+                    </button>
+
+                  </div>
 
                 </div>
 
-              </div>
+
+                {groupExpanded && (
+
+                  <div className="organization-children">
+
+                    {groupUnits.length === 0 && (
+
+                      <div className="organization-empty">
+                        No units in this group.
+                      </div>
+
+                    )}
 
 
-              {groupExpanded && (
+                    {groupUnits.map(
+                      (unit) => {
 
-                <div className="organization-children">
+                        const unitLines =
+                          lines[unit.id] ??
+                          [];
 
-                  {groupUnits.length === 0 && (
-                    <div className="organization-empty">
-                      No units in this group.
-                    </div>
-                  )}
+                        const unitExpanded =
+                          expandedUnits.includes(
+                            unit.id,
+                          );
 
-                  {groupUnits.map(
-                    (unit) => {
 
-                      const unitLines =
-                        lines[unit.id] ??
-                        [];
+                        return (
 
-                      const unitExpanded =
-                        expandedUnits.includes(
-                          unit.id,
-                        );
+                          <div
+                            className={`organization-unit ${
+                              !unit.is_active
+                                ? "inactive"
+                                : ""
+                            }`}
+                            key={unit.id}
+                          >
 
-                      return (
-                        <div
-                          className={`organization-unit ${
-                            !unit.is_active
-                              ? "inactive"
-                              : ""
-                          }`}
-                          key={unit.id}
-                        >
-
-                          <div className="organization-unit-header">
-
-                            <button
-                              type="button"
-                              className="tree-expand-button"
-                              onClick={() =>
-                                toggleUnit(
-                                  unit.id,
-                                )
-                              }
-                            >
-                              {unitExpanded
-                                ? "⌄"
-                                : "›"}
-                            </button>
-
-                            <div className="organization-unit-icon">
-                              U
-                            </div>
-
-                            <div className="organization-node-info">
-
-                              <strong>
-                                {unit.name}
-                              </strong>
-
-                              <span>
-                                Code {unit.code}
-                              </span>
-
-                            </div>
-
-                            <span className="organization-badge unit">
-                              UNIT
-                            </span>
-
-                            {!unit.is_active && (
-                              <span className="inactive-badge">
-                                INACTIVE
-                              </span>
-                            )}
-
-                            <div className="organization-node-actions">
+                            <div className="organization-unit-header">
 
                               <button
                                 type="button"
+                                className="tree-expand-button"
                                 onClick={() =>
-                                  openEditUnit(
-                                    unit,
-                                  )
-                                }
-                              >
-                                Edit
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  openAddLine(
+                                  toggleUnit(
                                     unit.id,
                                   )
                                 }
                               >
-                                + Line
+                                {unitExpanded
+                                  ? "⌄"
+                                  : "›"}
                               </button>
 
-                              <button
-                                type="button"
-                                className={
-                                  unit.is_active
-                                    ? "danger-action"
-                                    : "success-action"
-                                }
-                                onClick={() =>
-                                  toggleOrganization(
-                                    unit,
-                                  )
-                                }
-                              >
-                                {unit.is_active
-                                  ? "Deactivate"
-                                  : "Activate"}
-                              </button>
+
+                              <div className="organization-unit-icon">
+                                U
+                              </div>
+
+
+                              <div className="organization-node-info">
+
+                                <strong>
+                                  {unit.name}
+                                </strong>
+
+                                <span>
+                                  Code {unit.code}
+                                </span>
+
+                              </div>
+
+
+                              <span className="organization-badge unit">
+                                UNIT
+                              </span>
+
+
+                              {!unit.is_active && (
+                                <span className="inactive-badge">
+                                  INACTIVE
+                                </span>
+                              )}
+
+
+                              <div className="organization-node-actions">
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openEditUnit(
+                                      unit,
+                                    )
+                                  }
+                                >
+                                  Edit
+                                </button>
+
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openAddLine(
+                                      unit.id,
+                                    )
+                                  }
+                                >
+                                  + Line
+                                </button>
+
+
+                                <button
+                                  type="button"
+                                  className={
+                                    unit.is_active
+                                      ? "danger-action"
+                                      : "success-action"
+                                  }
+                                  onClick={() =>
+                                    toggleOrganization(
+                                      unit,
+                                    )
+                                  }
+                                >
+                                  {unit.is_active
+                                    ? "Deactivate"
+                                    : "Activate"}
+                                </button>
+
+                              </div>
 
                             </div>
+
+
+                            {unitExpanded && (
+
+                              <div className="line-list">
+
+                                {unitLines.length === 0 ? (
+
+                                  <div className="organization-empty">
+                                    No lines found.
+                                  </div>
+
+                                ) : (
+
+                                  unitLines.map(
+                                    (line) => (
+
+                                      <div
+                                        className={`line-row ${
+                                          !line.is_active
+                                            ? "inactive"
+                                            : ""
+                                        }`}
+                                        key={line.id}
+                                      >
+
+                                        <div className="line-number">
+                                          {line.line_number}
+                                        </div>
+
+
+                                        <div className="line-name">
+                                          {line.name}
+                                        </div>
+
+
+                                        {!line.is_active && (
+                                          <span className="inactive-badge">
+                                            INACTIVE
+                                          </span>
+                                        )}
+
+
+                                        <div className="line-actions">
+
+                                          {/* VIEW LINE */}
+                                          <button
+                                            type="button"
+                                            className="line-view-button"
+                                            onClick={() =>
+                                              navigate(
+                                                `/lines/${line.id}`,
+                                              )
+                                            }
+                                          >
+                                            View
+                                          </button>
+
+
+                                          {/* EDIT LINE */}
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              openEditLine(
+                                                line,
+                                              )
+                                            }
+                                          >
+                                            Edit
+                                          </button>
+
+
+                                          {/* ACTIVATE / DEACTIVATE */}
+                                          <button
+                                            type="button"
+                                            className={
+                                              line.is_active
+                                                ? "danger-action"
+                                                : "success-action"
+                                            }
+                                            onClick={() =>
+                                              toggleLine(
+                                                line,
+                                              )
+                                            }
+                                          >
+                                            {line.is_active
+                                              ? "Deactivate"
+                                              : "Activate"}
+                                          </button>
+
+                                        </div>
+
+                                      </div>
+
+                                    ),
+                                  )
+
+                                )}
+
+                              </div>
+
+                            )}
 
                           </div>
 
+                        );
 
-                          {unitExpanded && (
+                      },
+                    )}
 
-                            <div className="line-list">
+                  </div>
 
-                              {unitLines.length === 0 ? (
-                                <div className="organization-empty">
-                                  No lines found.
-                                </div>
-                              ) : (
+                )}
 
-                                unitLines.map(
-                                  (line) => (
+              </section>
 
-                                    <div
-                                      className={`line-row ${
-                                        !line.is_active
-                                          ? "inactive"
-                                          : ""
-                                      }`}
-                                      key={line.id}
-                                    >
+            );
 
-                                      <div className="line-number">
-                                        {line.line_number}
-                                      </div>
+          })}
 
-                                      <div className="line-name">
-                                        {line.name}
-                                      </div>
-
-                                      {!line.is_active && (
-                                        <span className="inactive-badge">
-                                          INACTIVE
-                                        </span>
-                                      )}
-
-                                      <div className="line-actions">
-
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            openEditLine(
-                                              line,
-                                            )
-                                          }
-                                        >
-                                          Edit
-                                        </button>
-
-                                        <button
-                                          type="button"
-                                          className={
-                                            line.is_active
-                                              ? "danger-action"
-                                              : "success-action"
-                                          }
-                                          onClick={() =>
-                                            toggleLine(
-                                              line,
-                                            )
-                                          }
-                                        >
-                                          {line.is_active
-                                            ? "Deactivate"
-                                            : "Activate"}
-                                        </button>
-
-                                      </div>
-
-                                    </div>
-
-                                  ),
-                                )
-
-                              )}
-
-                            </div>
-
-                          )}
-
-                        </div>
-                      );
-                    },
-                  )}
-
-                </div>
-
-              )}
-
-            </section>
-          );
-        })}
-
-      </div>
+        </div>
 
 
-      {/* ======================================================
-          ORGANIZATION MODAL
-          ====================================================== */}
+        {/* ======================================================
+            ORGANIZATION MODAL
+            ====================================================== */}
 
-      {showUnitForm && (
-
-        <div
-          className="organization-modal-overlay"
-          onClick={() =>
-            setShowUnitForm(false)
-          }
-        >
+        {showUnitForm && (
 
           <div
-            className="organization-modal"
-            onClick={(event) =>
-              event.stopPropagation()
+            className="organization-modal-overlay"
+            onClick={() =>
+              setShowUnitForm(false)
             }
           >
 
-            <div className="organization-modal-header">
+            <div
+              className="organization-modal"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
 
-              <div>
+              <div className="organization-modal-header">
 
-                <span>
-                  {editingUnit
-                    ? "Edit organization"
-                    : "New organization"}
-                </span>
+                <div>
 
-                <h2>
-                  {editingUnit
-                    ? "Update"
-                    : "Create"}
-                </h2>
+                  <span>
+                    {editingUnit
+                      ? "Edit organization"
+                      : "New organization"}
+                  </span>
+
+                  <h2>
+                    {editingUnit
+                      ? "Update"
+                      : "Create"}
+                  </h2>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowUnitForm(false)
+                  }
+                >
+                  ×
+                </button>
 
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setShowUnitForm(false)
+
+              <form
+                onSubmit={
+                  handleUnitSubmit
                 }
+                className="organization-form"
               >
-                ×
-              </button>
-
-            </div>
-
-
-            <form
-              onSubmit={
-                handleUnitSubmit
-              }
-              className="organization-form"
-            >
-
-              <label>
-                Name
-
-                <input
-                  value={
-                    unitForm.name
-                  }
-                  onChange={(event) =>
-                    setUnitForm(
-                      (previous) => ({
-                        ...previous,
-                        name:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="Group1 / Unit1"
-                />
-
-              </label>
-
-
-              <label>
-                Code
-
-                <input
-                  value={
-                    unitForm.code
-                  }
-                  onChange={(event) =>
-                    setUnitForm(
-                      (previous) => ({
-                        ...previous,
-                        code:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="100 / 101"
-                />
-
-              </label>
-
-
-              <label>
-                Type
-
-                <select
-                  value={
-                    unitForm.unit_type
-                  }
-                  onChange={(event) =>
-                    setUnitForm(
-                      (previous) => ({
-                        ...previous,
-                        unit_type:
-                          event.target.value as
-                            "GROUP" |
-                            "UNIT",
-                        parent_id:
-                          event.target.value ===
-                          "GROUP"
-                            ? null
-                            : previous.parent_id,
-                      }),
-                    )
-                  }
-                  disabled={
-                    editingUnit !== null
-                  }
-                >
-                  <option value="GROUP">
-                    Group
-                  </option>
-
-                  <option value="UNIT">
-                    Unit
-                  </option>
-                </select>
-
-              </label>
-
-
-              {unitForm.unit_type ===
-                "UNIT" && (
 
                 <label>
-                  Parent Group
+                  Name
 
-                  <select
+                  <input
                     value={
-                      unitForm.parent_id ??
-                      ""
+                      unitForm.name
                     }
                     onChange={(event) =>
                       setUnitForm(
                         (previous) => ({
                           ...previous,
-                          parent_id:
-                            event.target.value
-                              ? Number(
-                                  event.target.value,
-                                )
-                              : null,
+                          name:
+                            event.target.value,
                         }),
                       )
                     }
+                    placeholder="Group1 / Unit1"
+                  />
+
+                </label>
+
+
+                <label>
+                  Code
+
+                  <input
+                    value={
+                      unitForm.code
+                    }
+                    onChange={(event) =>
+                      setUnitForm(
+                        (previous) => ({
+                          ...previous,
+                          code:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    placeholder="100 / 101"
+                  />
+
+                </label>
+
+
+                <label>
+                  Type
+
+                  <select
+                    value={
+                      unitForm.unit_type
+                    }
+                    onChange={(event) =>
+                      setUnitForm(
+                        (previous) => ({
+                          ...previous,
+                          unit_type:
+                            event.target.value as
+                              | "GROUP"
+                              | "UNIT",
+                          parent_id:
+                            event.target.value ===
+                            "GROUP"
+                              ? null
+                              : previous.parent_id,
+                        }),
+                      )
+                    }
+                    disabled={
+                      editingUnit !== null
+                    }
                   >
 
-                    <option value="">
-                      Select group
+                    <option value="GROUP">
+                      Group
                     </option>
 
-                    {groups.map(
-                      (group) => (
-
-                        <option
-                          key={group.id}
-                          value={group.id}
-                        >
-                          {group.name} —{" "}
-                          {group.code}
-                        </option>
-
-                      ),
-                    )}
+                    <option value="UNIT">
+                      Unit
+                    </option>
 
                   </select>
 
                 </label>
 
-              )}
+
+                {unitForm.unit_type ===
+                  "UNIT" && (
+
+                  <label>
+                    Parent Group
+
+                    <select
+                      value={
+                        unitForm.parent_id ??
+                        ""
+                      }
+                      onChange={(event) =>
+                        setUnitForm(
+                          (previous) => ({
+                            ...previous,
+                            parent_id:
+                              event.target.value
+                                ? Number(
+                                    event.target.value,
+                                  )
+                                : null,
+                          }),
+                        )
+                      }
+                    >
+
+                      <option value="">
+                        Select group
+                      </option>
 
 
-              <div className="organization-form-actions">
+                      {groups.map(
+                        (group) => (
 
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={() =>
-                    setShowUnitForm(
-                      false,
-                    )
-                  }
-                >
-                  Cancel
-                </button>
+                          <option
+                            key={group.id}
+                            value={group.id}
+                          >
+                            {group.name} —{" "}
+                            {group.code}
+                          </option>
 
-                <button
-                  type="submit"
-                  className="organization-primary-button"
-                  disabled={saving}
-                >
-                  {saving
-                    ? "Saving..."
-                    : editingUnit
-                      ? "Save Changes"
-                      : "Create"}
-                </button>
+                        ),
+                      )}
 
-              </div>
+                    </select>
 
-            </form>
+                  </label>
 
-          </div>
-
-        </div>
-
-      )}
+                )}
 
 
-      {/* ======================================================
-          LINE MODAL
-          ====================================================== */}
+                <div className="organization-form-actions">
 
-      {showLineForm && (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() =>
+                      setShowUnitForm(
+                        false,
+                      )
+                    }
+                  >
+                    Cancel
+                  </button>
 
-        <div
-          className="organization-modal-overlay"
-          onClick={() =>
-            setShowLineForm(false)
-          }
-        >
 
-          <div
-            className="organization-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
+                  <button
+                    type="submit"
+                    className="organization-primary-button"
+                    disabled={saving}
+                  >
+                    {saving
+                      ? "Saving..."
+                      : editingUnit
+                        ? "Save Changes"
+                        : "Create"}
+                  </button>
 
-            <div className="organization-modal-header">
+                </div>
 
-              <div>
-
-                <span>
-                  {editingLine
-                    ? "Edit production line"
-                    : "New production line"}
-                </span>
-
-                <h2>
-                  {editingLine
-                    ? "Update Line"
-                    : "Add Line"}
-                </h2>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowLineForm(false)
-                }
-              >
-                ×
-              </button>
+              </form>
 
             </div>
 
+          </div>
 
-            <form
-              onSubmit={
-                handleLineSubmit
+        )}
+
+
+        {/* ======================================================
+            LINE MODAL
+            ====================================================== */}
+
+        {showLineForm && (
+
+          <div
+            className="organization-modal-overlay"
+            onClick={() =>
+              setShowLineForm(false)
+            }
+          >
+
+            <div
+              className="organization-modal"
+              onClick={(event) =>
+                event.stopPropagation()
               }
-              className="organization-form"
             >
 
-              <label>
-                Line Number
+              <div className="organization-modal-header">
 
-                <input
-                  type="number"
-                  min="1"
-                  value={
-                    lineForm.line_number
-                  }
-                  onChange={(event) =>
-                    setLineForm(
-                      (previous) => ({
-                        ...previous,
-                        line_number:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="e.g. 126"
-                />
+                <div>
 
-              </label>
+                  <span>
+                    {editingLine
+                      ? "Edit production line"
+                      : "New production line"}
+                  </span>
 
+                  <h2>
+                    {editingLine
+                      ? "Update Line"
+                      : "Add Line"}
+                  </h2>
 
-              <label>
-                Line Name
+                </div>
 
-                <input
-                  value={
-                    lineForm.name
-                  }
-                  onChange={(event) =>
-                    setLineForm(
-                      (previous) => ({
-                        ...previous,
-                        name:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="Line 126"
-                />
-
-              </label>
-
-
-              <div className="organization-form-actions">
 
                 <button
                   type="button"
-                  className="secondary-button"
                   onClick={() =>
-                    setShowLineForm(
-                      false,
-                    )
+                    setShowLineForm(false)
                   }
                 >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="organization-primary-button"
-                  disabled={saving}
-                >
-                  {saving
-                    ? "Saving..."
-                    : editingLine
-                      ? "Save Changes"
-                      : "Create Line"}
+                  ×
                 </button>
 
               </div>
 
-            </form>
+
+              <form
+                onSubmit={
+                  handleLineSubmit
+                }
+                className="organization-form"
+              >
+
+                <label>
+                  Line Number
+
+                  <input
+                    type="number"
+                    min="1"
+                    value={
+                      lineForm.line_number
+                    }
+                    onChange={(event) =>
+                      setLineForm(
+                        (previous) => ({
+                          ...previous,
+                          line_number:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    placeholder="e.g. 126"
+                  />
+
+                </label>
+
+
+                <label>
+                  Line Name
+
+                  <input
+                    value={
+                      lineForm.name
+                    }
+                    onChange={(event) =>
+                      setLineForm(
+                        (previous) => ({
+                          ...previous,
+                          name:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                    placeholder="Line 126"
+                  />
+
+                </label>
+
+
+                <div className="organization-form-actions">
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() =>
+                      setShowLineForm(
+                        false,
+                      )
+                    }
+                  >
+                    Cancel
+                  </button>
+
+
+                  <button
+                    type="submit"
+                    className="organization-primary-button"
+                    disabled={saving}
+                  >
+                    {saving
+                      ? "Saving..."
+                      : editingLine
+                        ? "Save Changes"
+                        : "Create Line"}
+                  </button>
+
+                </div>
+
+              </form>
+
+            </div>
 
           </div>
 
-        </div>
-
-      )}
+        )}
 
       </div>
+
     </DashboardLayout>
   );
 }

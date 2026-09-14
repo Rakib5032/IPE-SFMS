@@ -85,8 +85,10 @@ function Sidebar({
   /*
    * ADMIN role ID
    *
-   * Organizations and Users are restricted
-   * to Administrator.
+   * Users are restricted to Administrator.
+   * Organizations are controlled by VIEW_ORGANIZATIONS
+   * permission and therefore can be visible to other
+   * authorized roles.
    */
   const isAdmin = roleId === 1;
 
@@ -141,16 +143,11 @@ function Sidebar({
         /*
          * Organizations
          *
-         * ADMIN only
+         * Controlled by VIEW_ORGANIZATIONS
+         * permission.
          */
-        if (
-          item.label ===
-          "Organizations"
-        ) {
-          return (
-            isAdmin &&
-            canView(item.permission)
-          );
+        if (item.label === "Organizations") {
+          return canView(item.permission);
         }
 
 
@@ -322,6 +319,7 @@ function Sidebar({
               )}
 
             </div>
+
           )}
 
 
@@ -352,8 +350,7 @@ function Sidebar({
                       {item.label === "Users" &&
                         "♙"}
 
-                      {item.label ===
-                        "Organizations" &&
+                      {item.label === "Organizations" &&
                         "▥"}
 
                     </span>
@@ -368,6 +365,7 @@ function Sidebar({
               )}
 
             </div>
+
           )}
 
 
@@ -407,6 +405,7 @@ function Sidebar({
               )}
 
             </div>
+
           )}
 
         </nav>

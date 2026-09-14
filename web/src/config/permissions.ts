@@ -16,6 +16,17 @@
 //
 // The frontend uses role_id for UI access control.
 // The backend remains the final authority for security.
+//
+// IMPORTANT
+// ------------------------------------------------------------
+// This file defines BASE ROLE permissions.
+//
+// Organization editing is NOT automatically granted to
+// DGM, CENTRAL_MANAGER, or GROUP_MANAGER.
+//
+// An Administrator may later grant organization-edit access
+// to an individual eligible manager through user-specific
+// permission overrides.
 // ============================================================
 
 
@@ -89,47 +100,46 @@ const roleCodes: Record<number, RoleCode> = {
 
 
 // ============================================================
-// ROLE → PERMISSIONS
+// ROLE → BASE PERMISSIONS
 // ============================================================
 //
-// Current SFMS frontend requirement:
+// ORGANIZATION ACCESS
 //
 // ADMIN
-//     Full access
+//     View all organizations.
+//     Manage organizations.
 //
 // DGM
-//     Management + operational access
-//     No Users
+//     View organizations.
+//     Organization editing is NOT granted by default.
 //
 // CENTRAL_MANAGER
-//     Management + operational access
-//     View Organizations
-//     No Users
+//     View organizations.
+//     Organization editing is NOT granted by default.
 //
 // GROUP_MANAGER
-//     Group-level operational access + reports
-//     No Users
+//     View assigned group and its units.
+//     Organization editing is NOT granted by default.
 //
 // FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // DPM
-//     Same permission level as FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // APM
-//     Same permission level as FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // IN_CHARGE
-//     Same permission level as FLOOR_IE
-//     Unit-level operational access + reports
+//     No Organization page.
+//     Works through Lines for assigned unit.
 //
 // SUPERVISOR
-//     Line-level operational access
-//     No Users
-//     No Organizations
-//     No Reports
+//     No Organization page.
+//     Works through assigned line(s) only.
 //
 // ============================================================
 
@@ -183,12 +193,10 @@ const rolePermissions: Record<
     "VIEW_DASHBOARD",
 
     // Users
-    // "VIEW_USERS",
-    // "MANAGE_USERS",
+    // No user management access.
 
     // Organizations
-    // "VIEW_ORGANIZATIONS",
-    // "MANAGE_ORGANIZATIONS",
+    "VIEW_ORGANIZATIONS",
 
     // Lines
     "VIEW_LINES",
@@ -220,8 +228,7 @@ const rolePermissions: Record<
     "VIEW_DASHBOARD",
 
     // Users
-    // "VIEW_USERS",
-    // "MANAGE_USERS",
+    // No user management access.
 
     // Organizations
     "VIEW_ORGANIZATIONS",
@@ -256,11 +263,11 @@ const rolePermissions: Record<
     "VIEW_DASHBOARD",
 
     // Users
-    // "VIEW_USERS",
-    // "MANAGE_USERS",
+    // No user management access.
 
     // Organizations
-    // Organization management is not allowed here.
+    // View assigned group only.
+    "VIEW_ORGANIZATIONS",
 
     // Lines
     "VIEW_LINES",
@@ -290,6 +297,9 @@ const rolePermissions: Record<
   FLOOR_IE: [
     "VIEW_DASHBOARD",
 
+    // No Organization page.
+    // Access assigned unit through Lines.
+
     // Lines
     "VIEW_LINES",
     "ASSIGN_LINES",
@@ -317,6 +327,9 @@ const rolePermissions: Record<
 
   DPM: [
     "VIEW_DASHBOARD",
+
+    // No Organization page.
+    // Access assigned unit through Lines.
 
     // Lines
     "VIEW_LINES",
@@ -346,9 +359,8 @@ const rolePermissions: Record<
   APM: [
     "VIEW_DASHBOARD",
 
-    // Lines
-    "VIEW_LINES",
-    "ASSIGN_LINES",
+    // No Organization page.
+    // Access assigned unit through Lines.
 
     // Layout
     "VIEW_LAYOUT",
@@ -362,6 +374,10 @@ const rolePermissions: Record<
     "VIEW_LINE_STATUS",
     "MANAGE_LINE_STATUS",
 
+    // Lines
+    "VIEW_LINES",
+    "ASSIGN_LINES",
+
     // Reports
     "VIEW_REPORTS",
   ],
@@ -373,6 +389,9 @@ const rolePermissions: Record<
 
   IN_CHARGE: [
     "VIEW_DASHBOARD",
+
+    // No Organization page.
+    // Access assigned unit through Lines.
 
     // Lines
     "VIEW_LINES",
@@ -402,6 +421,9 @@ const rolePermissions: Record<
   SUPERVISOR: [
     "VIEW_DASHBOARD",
 
+    // No Organization page.
+    // Only assigned line(s) are accessible.
+
     // Lines
     "VIEW_LINES",
 
@@ -417,7 +439,7 @@ const rolePermissions: Record<
     "VIEW_LINE_STATUS",
     "MANAGE_LINE_STATUS",
 
-    // Reports intentionally excluded
+    // Reports intentionally excluded.
   ],
 };
 

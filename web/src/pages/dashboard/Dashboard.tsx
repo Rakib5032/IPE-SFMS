@@ -1,5 +1,7 @@
 import { useAuth } from "../../hooks/useAuth";
 import DashboardLayout from "../../layouts/DashboardLayout";
+import "./Dashboard.css";
+
 
 function Dashboard() {
   const { user, loading } = useAuth();

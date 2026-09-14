@@ -9,6 +9,7 @@ from sqlalchemy import (
     Integer,
     JSON,
     String,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,6 +23,16 @@ if TYPE_CHECKING:
 
 class Layout(Base):
     __tablename__ = "layouts"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "line_id",
+            "layout_year",
+            "layout_month",
+            "layout_number",
+            name="uq_layout_line_month_number",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(
         primary_key=True
@@ -57,24 +68,47 @@ class Layout(Base):
     )
 
     # ========================================================
+    # MONTHLY LAYOUT NUMBERING
+    # ========================================================
+
+    # Example:
+    # Line 5 - September 2026:
+    #   layout_number = 1
+    #   layout_number = 2
+    #   layout_number = 3
+    #
+    # Line 5 - October 2026:
+    #   layout_number = 1
+
+    layout_number: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    layout_year: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    layout_month: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    # ========================================================
     # MACHINE INFORMATION
     # ========================================================
 
-    # New field.
-    # Existing database allows NULL.
     required_machine_count: Mapped[int | None] = mapped_column(
         Integer,
         nullable=True,
     )
 
-    # Existing field.
     total_machines: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
     )
 
-    # Existing field.
-    # Database stores this as JSON.
     machine_status: Mapped[dict] = mapped_column(
         JSON,
         nullable=False,
@@ -105,7 +139,6 @@ class Layout(Base):
         nullable=True,
     )
 
-    # Existing field.
     duration_minutes: Mapped[int | None] = mapped_column(
         Integer,
         nullable=True,
@@ -115,8 +148,6 @@ class Layout(Base):
     # GENERAL INFORMATION
     # ========================================================
 
-    # New field.
-    # Existing database allows NULL.
     is_active: Mapped[bool | None] = mapped_column(
         Boolean,
         nullable=True,
@@ -127,15 +158,11 @@ class Layout(Base):
         nullable=True,
     )
 
-    # New field.
-    # Existing database allows NULL.
     created_at: Mapped[datetime | None] = mapped_column(
         DateTime,
         nullable=True,
     )
 
-    # New field.
-    # Existing database allows NULL.
     updated_at: Mapped[datetime | None] = mapped_column(
         DateTime,
         nullable=True,

@@ -11,16 +11,40 @@ class LayoutBase(BaseModel):
     buyer: str
     smv: float
 
+    # ========================================================
+    # MONTHLY LAYOUT NUMBERING
+    # ========================================================
+
+    layout_number: int
+    layout_year: int
+    layout_month: int
+
+    # ========================================================
+    # MACHINE INFORMATION
+    # ========================================================
+
     required_machine_count: int | None = None
     total_machines: int
     machine_status: dict
 
+    # ========================================================
+    # LAYOUT STATUS
+    # ========================================================
+
     status: str = "RUNNING"
+
+    # ========================================================
+    # TIME INFORMATION
+    # ========================================================
 
     started_at: datetime
     completed_at: datetime | None = None
 
     duration_minutes: int | None = None
+
+    # ========================================================
+    # GENERAL INFORMATION
+    # ========================================================
 
     is_active: bool | None = None
     notes: str | None = None

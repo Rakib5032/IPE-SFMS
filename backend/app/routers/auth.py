@@ -77,9 +77,7 @@ def login(
     )
 
 
-# 
 # Refresh Access Token
-# 
 
 @router.post(
     "/refresh",
@@ -89,9 +87,10 @@ def refresh_token(
     refresh_data: RefreshTokenRequest,
     db: Session = Depends(get_db),
 ):
-    # 
+    
+    
     # Validate refresh JWT
-    # 
+
 
     try:
         employee_id = decode_refresh_token(

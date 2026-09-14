@@ -1,0 +1,1243 @@
+/* ============================================================
+   LINE DETAILS PAGE
+   ============================================================ */
+
+.line-details-page {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.line-details-header {
+  margin-bottom: 28px;
+}
+
+.line-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.18));
+  border-radius: 10px;
+
+  background: var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  padding: 8px 13px;
+  margin-bottom: 20px;
+
+  color: inherit;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.line-back-button:hover {
+  background: var(--card-hover-bg, rgba(127, 127, 127, 0.08));
+
+  border-color: rgba(37, 99, 235, 0.25);
+
+  transform: translateX(-2px);
+
+  box-shadow:
+    0 5px 18px rgba(0, 0, 0, 0.05);
+}
+
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+
+.line-title-row {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  padding: 26px 28px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.15));
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.07),
+      transparent 42%
+    ),
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 12px 35px rgba(15, 23, 42, 0.06);
+
+  overflow: hidden;
+}
+
+.line-title-row::before {
+  content: "";
+
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  top: -100px;
+  right: -50px;
+
+  border-radius: 50%;
+
+  background: rgba(37, 99, 235, 0.08);
+
+  pointer-events: none;
+}
+
+.line-title-row > * {
+  position: relative;
+  z-index: 1;
+}
+
+.line-eyebrow {
+  margin: 0 0 8px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  color: #2563eb;
+
+  opacity: 0.9;
+}
+
+.line-title-row h1 {
+  margin: 0;
+
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.05;
+
+  font-weight: 800;
+
+  letter-spacing: -0.035em;
+}
+
+.line-subtitle {
+  margin: 10px 0 0;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  opacity: 0.62;
+}
+
+
+/* ============================================================
+   LINE ACTIVE / INACTIVE BADGES
+   ============================================================ */
+
+.line-active-badge,
+.line-inactive-badge,
+.layout-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 31px;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.04em;
+
+  white-space: nowrap;
+}
+
+.line-active-badge {
+  border: 1px solid rgba(34, 197, 94, 0.2);
+
+  background: rgba(34, 197, 94, 0.1);
+
+  color: #16a34a;
+}
+
+.line-active-badge::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+.line-inactive-badge {
+  border: 1px solid rgba(239, 68, 68, 0.2);
+
+  background: rgba(239, 68, 68, 0.1);
+
+  color: #dc2626;
+}
+
+.line-inactive-badge::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #ef4444;
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.line-details-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 14px 16px;
+
+  margin-bottom: 24px;
+
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 13px;
+
+  background: rgba(239, 68, 68, 0.07);
+
+  color: #dc2626;
+
+  font-size: 14px;
+
+  box-shadow:
+    0 5px 18px rgba(239, 68, 68, 0.04);
+}
+
+
+/* ============================================================
+   SUMMARY CARDS
+   ============================================================ */
+
+.line-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-bottom: 32px;
+}
+
+.line-summary-card {
+  position: relative;
+
+  min-width: 0;
+
+  padding: 21px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.14));
+  border-radius: 17px;
+
+  background: var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 7px 24px rgba(15, 23, 42, 0.045);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.line-summary-card::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 3px;
+
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    rgba(37, 99, 235, 0)
+  );
+
+  opacity: 0;
+
+  transition: opacity 0.22s ease;
+}
+
+.line-summary-card:hover {
+  transform: translateY(-3px);
+
+  border-color: rgba(37, 99, 235, 0.18);
+
+  box-shadow:
+    0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.line-summary-card:hover::after {
+  opacity: 1;
+}
+
+.line-summary-card span,
+.layout-summary-grid span,
+.layout-summary-top span,
+.line-status-reason span,
+.layout-notes span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+
+  opacity: 0.48;
+}
+
+.line-summary-card strong {
+  display: block;
+
+  font-size: 20px;
+  line-height: 1.2;
+
+  font-weight: 750;
+
+  letter-spacing: -0.015em;
+}
+
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+
+.line-details-section {
+  margin-top: 32px;
+}
+
+.line-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 15px;
+}
+
+.line-section-label {
+  margin: 0 0 5px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  color: #2563eb;
+
+  opacity: 0.85;
+}
+
+.line-section-heading h2 {
+  margin: 0;
+
+  font-size: 21px;
+  line-height: 1.2;
+
+  font-weight: 750;
+
+  letter-spacing: -0.02em;
+}
+
+
+/* ============================================================
+   STATUS PANEL
+   ============================================================ */
+
+.line-status-panel {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 28px;
+
+  padding: 25px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.15));
+  border-radius: 19px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.035),
+      transparent 55%
+    ),
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 9px 28px rgba(15, 23, 42, 0.05);
+
+  overflow: hidden;
+}
+
+.line-status-panel::before {
+  content: "";
+
+  position: absolute;
+
+  width: 220px;
+  height: 220px;
+
+  right: -120px;
+  top: -130px;
+
+  border-radius: 50%;
+
+  background: rgba(37, 99, 235, 0.06);
+
+  pointer-events: none;
+}
+
+.line-status-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.line-status-main {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+
+  min-width: 0;
+}
+
+.line-status-indicator {
+  width: 15px;
+  height: 15px;
+
+  border-radius: 50%;
+
+  flex: 0 0 auto;
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+/* ============================================================
+   STATUS COLORS
+   ============================================================ */
+
+.status-running {
+  color: #16a34a;
+}
+
+.line-status-indicator.status-running {
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 5px rgba(34, 197, 94, 0.11),
+    0 0 18px rgba(34, 197, 94, 0.25);
+
+  animation: lineStatusPulse 2s infinite;
+}
+
+.status-layout {
+  color: #d97706;
+}
+
+.line-status-indicator.status-layout {
+  background: #f59e0b;
+
+  box-shadow:
+    0 0 0 5px rgba(245, 158, 11, 0.11);
+}
+
+.status-off {
+  color: #dc2626;
+}
+
+.line-status-indicator.status-off {
+  background: #ef4444;
+
+  box-shadow:
+    0 0 0 5px rgba(239, 68, 68, 0.11);
+}
+
+.status-unknown {
+  color: #64748b;
+}
+
+.line-status-indicator.status-unknown {
+  background: #94a3b8;
+
+  box-shadow:
+    0 0 0 5px rgba(148, 163, 184, 0.1);
+}
+
+
+/* ============================================================
+   STATUS TEXT
+   ============================================================ */
+
+.line-status-main strong {
+  display: block;
+
+  font-size: 19px;
+  line-height: 1.2;
+
+  font-weight: 800;
+
+  letter-spacing: -0.015em;
+}
+
+.line-status-main p {
+  margin: 5px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.45;
+
+  opacity: 0.58;
+}
+
+
+/* ============================================================
+   STATUS REASON
+   ============================================================ */
+
+.line-status-reason {
+  min-width: 240px;
+
+  padding-left: 24px;
+
+  border-left: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.15));
+}
+
+.line-status-reason p,
+.layout-notes p {
+  margin: 0;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+  opacity: 0.8;
+}
+
+
+/* ============================================================
+   LAYOUT CARD
+   ============================================================ */
+
+.layout-summary-card {
+  position: relative;
+
+  padding: 25px;
+
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.15));
+  border-radius: 19px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.025),
+      transparent 50%
+    ),
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  box-shadow:
+    0 9px 28px rgba(15, 23, 42, 0.05);
+
+  overflow: hidden;
+}
+
+.layout-summary-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 3px;
+
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    #60a5fa,
+    transparent
+  );
+
+  opacity: 0.75;
+}
+
+
+/* ============================================================
+   LAYOUT HEADER
+   ============================================================ */
+
+.layout-summary-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 25px;
+}
+
+.layout-summary-top strong {
+  display: block;
+
+  font-size: 23px;
+
+  line-height: 1.2;
+
+  font-weight: 800;
+
+  letter-spacing: -0.025em;
+}
+
+.layout-status-badge {
+  color: inherit;
+
+  background: rgba(127, 127, 127, 0.08);
+
+  border: 1px solid
+    rgba(127, 127, 127, 0.12);
+}
+
+
+/* ============================================================
+   LAYOUT INFORMATION GRID
+   ============================================================ */
+
+.layout-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 1px;
+
+  border: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.1));
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  background:
+    var(--border-color, rgba(127, 127, 127, 0.1));
+}
+
+.layout-summary-grid > div {
+  min-width: 0;
+
+  padding: 17px;
+
+  background:
+    var(--card-bg, rgba(255, 255, 255, 0.04));
+
+  transition:
+    background 0.2s ease;
+}
+
+.layout-summary-grid > div:hover {
+  background:
+    var(--card-hover-bg, rgba(127, 127, 127, 0.055));
+}
+
+.layout-summary-grid strong {
+  display: block;
+
+  font-size: 15px;
+
+  line-height: 1.35;
+
+  font-weight: 700;
+
+  word-break: break-word;
+}
+
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+
+.layout-notes {
+  margin-top: 23px;
+
+  padding: 19px;
+
+  border: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.1));
+
+  border-radius: 13px;
+
+  background:
+    rgba(127, 127, 127, 0.025);
+}
+
+.layout-notes span {
+  margin-bottom: 8px;
+}
+
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.layout-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 23px;
+  padding-top: 19px;
+
+  border-top: 1px solid
+    var(--border-color, rgba(127, 127, 127, 0.12));
+}
+
+.layout-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 40px;
+
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 10px;
+
+  padding: 9px 16px;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.layout-actions button:hover {
+  background: #1d4ed8;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 9px 22px rgba(37, 99, 235, 0.25);
+}
+
+.layout-actions button:active {
+  transform: translateY(0);
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.line-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 150px;
+
+  padding: 30px;
+
+  border: 1px dashed
+    rgba(127, 127, 127, 0.25);
+
+  border-radius: 17px;
+
+  background:
+    rgba(127, 127, 127, 0.018);
+
+  text-align: center;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  opacity: 0.65;
+}
+
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+
+.line-details-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 320px;
+
+  padding: 60px 20px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  opacity: 0.65;
+}
+
+.line-details-loading::before {
+  content: "";
+
+  width: 34px;
+  height: 34px;
+
+  margin-bottom: 15px;
+
+  border: 3px solid
+    rgba(127, 127, 127, 0.18);
+
+  border-top-color: #2563eb;
+
+  border-radius: 50%;
+
+  animation: lineDetailsSpin 0.8s linear infinite;
+}
+
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes lineStatusPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 5px rgba(34, 197, 94, 0.11),
+      0 0 18px rgba(34, 197, 94, 0.2);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(34, 197, 94, 0.04),
+      0 0 24px rgba(34, 197, 94, 0.28);
+  }
+}
+
+@keyframes lineDetailsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1050px) {
+  .line-details-page {
+    padding: 25px;
+  }
+
+  .line-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .layout-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .line-status-panel {
+    align-items: flex-start;
+  }
+}
+
+
+/* ============================================================
+   SMALL TABLET
+   ============================================================ */
+
+@media (max-width: 800px) {
+  .line-title-row {
+    padding: 23px;
+  }
+
+  .line-status-panel {
+    flex-direction: column;
+  }
+
+  .line-status-reason {
+    width: 100%;
+    min-width: 0;
+
+    padding-left: 0;
+    padding-top: 18px;
+
+    border-left: none;
+
+    border-top: 1px solid
+      var(--border-color, rgba(127, 127, 127, 0.15));
+  }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 650px) {
+  .line-details-page {
+    padding: 18px 14px;
+  }
+
+  .line-details-header {
+    margin-bottom: 22px;
+  }
+
+  .line-back-button {
+    margin-bottom: 14px;
+  }
+
+  .line-title-row {
+    flex-direction: column;
+
+    padding: 21px 18px;
+
+    border-radius: 17px;
+  }
+
+  .line-title-row h1 {
+    font-size: 30px;
+  }
+
+  .line-summary-grid {
+    grid-template-columns: 1fr;
+
+    gap: 11px;
+
+    margin-bottom: 25px;
+  }
+
+  .line-summary-card {
+    padding: 17px;
+  }
+
+  .line-details-section {
+    margin-top: 25px;
+  }
+
+  .line-section-heading h2 {
+    font-size: 19px;
+  }
+
+  .line-status-panel {
+    padding: 20px;
+
+    border-radius: 16px;
+  }
+
+  .line-status-main {
+    align-items: flex-start;
+  }
+
+  .line-status-main strong {
+    font-size: 17px;
+  }
+
+  .layout-summary-card {
+    padding: 20px;
+
+    border-radius: 16px;
+  }
+
+  .layout-summary-top {
+    flex-direction: column;
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+  }
+
+  .layout-summary-top strong {
+    font-size: 20px;
+  }
+
+  .layout-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .layout-summary-grid > div {
+    padding: 14px 15px;
+  }
+
+  .layout-notes {
+    padding: 16px;
+
+    margin-top: 18px;
+  }
+
+  .layout-actions {
+    justify-content: stretch;
+  }
+
+  .layout-actions button {
+    width: 100%;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 400px) {
+  .line-details-page {
+    padding: 15px 11px;
+  }
+
+  .line-title-row {
+    padding: 18px 16px;
+  }
+
+  .line-title-row h1 {
+    font-size: 27px;
+  }
+
+  .line-subtitle {
+    font-size: 13px;
+  }
+
+  .line-summary-card {
+    padding: 15px;
+  }
+
+  .line-status-panel {
+    padding: 17px;
+  }
+
+  .line-status-reason {
+    padding-top: 15px;
+  }
+
+  .layout-summary-card {
+    padding: 17px;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .line-status-indicator.status-running,
+  .line-details-loading::before {
+    animation: none;
+  }
+
+  .line-summary-card,
+  .line-back-button,
+  .layout-actions button {
+    transition: none;
+  }
+}
+
+
+/* ============================================================
+   REDESIGNED PAGE - SMALL UI POLISH
+   ============================================================ */
+
+.line-details-error span:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+
+  background: rgba(239, 68, 68, 0.12);
+
+  font-size: 13px;
+}
+
+
+.line-empty-state strong {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: inherit;
+
+  font-size: 15px;
+  font-weight: 750;
+
+  opacity: 0.85;
+}
+
+
+.line-empty-state span {
+  display: block;
+
+  max-width: 420px;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+  opacity: 0.65;
+}
+
+
+/* Better status typography inside summary cards */
+
+.line-summary-card strong.status-running,
+.line-summary-card strong.status-layout,
+.line-summary-card strong.status-off,
+.line-summary-card strong.status-unknown {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+
+/* Status indicator inside status text */
+
+.line-summary-card strong.status-running::before,
+.line-summary-card strong.status-layout::before,
+.line-summary-card strong.status-off::before,
+.line-summary-card strong.status-unknown::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+}
+
+
+.line-summary-card strong.status-running::before {
+  background: #22c55e;
+}
+
+
+.line-summary-card strong.status-layout::before {
+  background: #f59e0b;
+}
+
+
+.line-summary-card strong.status-off::before {
+  background: #ef4444;
+}
+
+
+.line-summary-card strong.status-unknown::before {
+  background: #94a3b8;
+}
+
+
+/* Improve layout action arrow */
+
+.layout-actions button span {
+  display: inline-flex;
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+.layout-actions button:hover span {
+  transform: translateX(3px);
+}
+
+
+/* Better focus accessibility */
+
+.line-back-button:focus-visible,
+.layout-actions button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 3px;
+}
+
+
+/* Mobile error */
+
+@media (max-width: 650px) {
+  .line-details-error {
+    align-items: flex-start;
+  }
+
+  .line-empty-state {
+    padding: 24px 18px;
+  }
+}
